@@ -1,0 +1,15 @@
+.direnv
+.vscode
+**/node_modules
+**/.DS_Store
+**/build
+**/.env
+**/env
+**/venv
+**/dist
+**/latestBuild.zip
+**/cache
+**/*.pyc
+
+**/__pycache__
+**/.pytest_cache

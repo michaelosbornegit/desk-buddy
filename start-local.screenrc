@@ -1,0 +1,8 @@
+startup_message off
+deflogin off
+
+screen -t app 0 bash ./start-app.sh
+split
+focus
+screen -t server 1 bash ./start-server.sh
+focus

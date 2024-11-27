@@ -1,0 +1,21 @@
+{
+  "name": "desk-buddy",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/nix:1": {
+      "extraNixConfig": "experimental-features = nix-command flakes"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "mkhl.direnv"
+      ]
+    }
+  },
+  "runArgs": ["--name", "desk-buddy_devcontainer"],
+  "postCreateCommand": "direnv allow . && nix develop --command bash /tmp/post-install-setup.sh",
+  "remoteUser": "vscode"
+}
