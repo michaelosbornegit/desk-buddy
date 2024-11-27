@@ -1,5 +1,5 @@
 # Own workspaces
-chown -R vscode /workspaces
+sudo chown -R vscode /workspaces
 
 # Use official oh-my-zsh installer
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended

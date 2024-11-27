@@ -17,9 +17,7 @@
       in pkgs.mkShell {
         buildInputs = with pkgs; [
           zsh
-          # uv
-          # entr
-          # nodejs_22
+          # nodejs_20
           # htop
           # jdk8
           # python3

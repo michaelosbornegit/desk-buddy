@@ -1,5 +1,5 @@
 {
-  "name": "desk-buddy",
+  "name": "NAME_REPLACE_ME",
   "build": {
     "dockerfile": "Dockerfile"
   },
@@ -15,7 +15,7 @@
       ]
     }
   },
-  "runArgs": ["--name", "desk-buddy_devcontainer"],
+  "runArgs": ["--name", "NAME_REPLACE_ME_devcontainer"],
   "postCreateCommand": "direnv allow . && nix develop --command bash /tmp/post-install-setup.sh",
   "remoteUser": "vscode"
 }
