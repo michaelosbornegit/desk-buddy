@@ -4,7 +4,8 @@ FROM debian:stable-slim
 RUN apt update && apt install -y \
     direnv \
     sudo \
-    git
+    git \
+    zsh
 
 # Create vscode user and add to sudo group
 RUN useradd -m -s /bin/bash vscode && \
@@ -20,5 +21,5 @@ USER vscode
 
 RUN git config --global --add safe.directory /workspaces/*
 
-# Set the working directory
+# # Set the working directory
 WORKDIR /workspaces

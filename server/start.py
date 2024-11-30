@@ -3,8 +3,6 @@ import app.socketio_instance as socketio_instance
 from config import Config
 
 # import things so they write to requirements.txt
-import eventlet
-import gunicorn
 
 if __name__ == "__main__":
     created_app = app.create_app()

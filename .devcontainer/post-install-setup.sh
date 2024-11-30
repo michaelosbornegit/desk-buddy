@@ -13,11 +13,7 @@ echo 'znap source marlonrichert/zsh-autocomplete' >> ~/.zshrc && \
     echo 'znap source zsh-users/zsh-autosuggestions' >> ~/.zshrc && \
     echo 'znap source zsh-users/zsh-syntax-highlighting' >> ~/.zshrc
 
-# Add direnv to bash
-echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Add direnv to zsh
 echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
-
-# load zsh if bash loads
-echo 'exec zsh' >> ~/.bashrc

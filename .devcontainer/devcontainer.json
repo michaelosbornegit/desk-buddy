@@ -1,5 +1,5 @@
 {
-  "name": "NAME_REPLACE_ME",
+  "name": "desk-buddy",
   "build": {
     "dockerfile": "Dockerfile"
   },
@@ -10,12 +10,18 @@
   },
   "customizations": {
     "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      },
       "extensions": [
         "mkhl.direnv"
       ]
     }
   },
-  "runArgs": ["--name", "NAME_REPLACE_ME_devcontainer"],
+  "runArgs": [
+    "--name",
+    "desk-buddy_devcontainer"
+  ],
   "postCreateCommand": "direnv allow . && nix develop --command bash /tmp/post-install-setup.sh",
   "remoteUser": "vscode"
 }

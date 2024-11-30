@@ -4,7 +4,7 @@ from app.dashboard import bp
 from app.middlewares import require_auth
 from app.dashboard import services
 
-@bp.route("dog/<platform>", methods=["GET"])
+@bp.route("register", methods=["GET"])
 @require_auth()
 def dog_dashboard(platform):
     if platform == "two-screens-four-buttons":

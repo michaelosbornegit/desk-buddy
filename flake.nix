@@ -12,21 +12,11 @@
       devShellForSystem = system: let
         pkgs = import nixpkgs { 
           inherit system; 
-          config.allowUnfree = true; # Needed for terraform and other "unfree" packages
+          # config.allowUnfree = true; # Needed for terraform and other "unfree" packages
         };
       in pkgs.mkShell {
         buildInputs = with pkgs; [
           zsh
-          # nodejs_20
-          # htop
-          # jdk8
-          # python3
-          # docker
-          # azure-cli
-          # terraform
-          # dotnet-sdk_8
-          # neo-cowsay
-          # gh
         ];
       };
     in
