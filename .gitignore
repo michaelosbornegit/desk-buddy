@@ -10,6 +10,7 @@
 **/latestBuild.zip
 **/cache
 **/*.pyc
+**/secrets.py
 
 **/__pycache__
 **/.pytest_cache
