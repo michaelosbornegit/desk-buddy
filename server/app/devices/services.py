@@ -1,90 +1,121 @@
-from app.helpers import home_assistant as home_assistant_helper
-from app.helpers import utils
+from app.db import db
 from datetime import datetime, timezone
+from app.bcrypt import GlobalBcrypt
+from app.errors import unauthorized
+from app.helpers.utils import get_property_if_exists
 
-def get_dog_dashboard_two_screens_four_buttons():
-    # get all necessary values
-    timer_since_last_out = home_assistant_helper.get_home_assistant_value("input_datetime.last_time_out")
-    last_peed = home_assistant_helper.get_home_assistant_value("input_datetime.dog_last_peed")
-    last_pooped = home_assistant_helper.get_home_assistant_value("input_datetime.dog_last_pooped")
-    last_fed = home_assistant_helper.get_home_assistant_value("input_datetime.last_fed")
-
-    utc_time = datetime.now(timezone.utc)
-
-    last_out_time = datetime.fromisoformat(timer_since_last_out['last_reported'])
-    try:
-        last_out_time = datetime.fromisoformat(timer_since_last_out['attributes']['finishes_at'])
-    except KeyError:
-        pass
-
-    # format response for display
-    screen_one = {
-        'text': f'''<- Last out
-{utils.pretty_print_time_between(last_out_time, utc_time)}
-
-Last fed ->
-{utils.pretty_print_time_between(datetime.fromtimestamp(last_fed['attributes']['timestamp'], tz=timezone.utc), utc_time)}'''
+DEFAULT_DEVICE_CONFIG = {
+    'dashboard': {
+        'widgets': [
+            'time2row',
+            'configureMeNote2row'
+        ],
+        "dashboardFetchInterval": (1 / 2) * 1000,
+    },
+    'menu':  [
+                {
+                    'label': 'Games',
+                    'children': [
+                        {
+                            'label': 'Reflexes',
+                            'action': 'fetchExec',
+                            'path': 'modules/games/reflexes',
+                        },
+                        {
+                            'label': 'Simon Says',
+                            'action': 'fetchExec',
+                            'path': 'modules/games/simon-says',
+                        },
+                        {
+                            'label': 'Beat keeper',
+                            'action': 'fetchExec',
+                            'path': 'modules/games/simon-says',
+                        },
+                        {
+                            'label': 'Back',
+                            'action': 'back',
+                        },
+                    ]
+                },
+                {
+                    'label': 'Ask Buddy',
+                    'children': [
+                        {
+                            'label': 'Motivation',
+                            'action': 'fetchExec',
+                            'path': 'modules/ask-buddy/motivation',
+                        },
+                        {
+                            'label': 'Meaning',
+                            'action': 'fetchExec',
+                            'path': 'modules/ask-buddy/meaning',
+                        },
+                        {
+                            'label': 'Joke',
+                            'action': 'fetchExec',
+                            'path': 'modules/ask-buddy/joke',
+                        },
+                        {
+                            'label': 'Back',
+                            'action': 'back',
+                        },
+                    ]
+                },
+                {
+                    'label': 'Go Home',
+                    'action': 'home',
+                },
+            ],
+            'configFetchInterval': 10 * 1000,
     }
 
-    screen_two = {
-        'text': f'''<- Last peed
-{utils.pretty_print_time_between(datetime.fromtimestamp(last_peed['attributes']['timestamp'], tz=timezone.utc), utc_time)}
 
-Last pooped ->
-{utils.pretty_print_time_between(datetime.fromtimestamp(last_pooped['attributes']['timestamp'], tz=timezone.utc), utc_time)}'''
-    }
+def register_device(request_data):
+    device_id = request_data['deviceId']
+    username = request_data['username']
+    password = request_data['password']
 
-    return {
-        'screen_one': screen_one,
-        'screen_two': screen_two,
-    }
+    # Check if username exists on any device
+    existing_user = db.users.find_one({'username': username})
 
-def post_dog_dashboard_two_screens_four_buttons(button):
-    print(button)
-    if button == "button1":
-        home_assistant_helper.press_home_assistant_button("input_button.i_took_jade_out_now")
-    elif button == "button2":
-        home_assistant_helper.press_home_assistant_button("input_button.i_fed_dog")
-    elif button == "button3":
-        home_assistant_helper.press_home_assistant_button("input_button.dog_peed")
-    elif button == "button4":
-        home_assistant_helper.press_home_assistant_button("input_button.dog_pooped")
-    return "Button pressed"
+    if existing_user:
+        # Check if password matches
+        if not GlobalBcrypt.instance.check_hash(password, existing_user['password']):
+            return unauthorized('Invalid password')
+    else:
+        # Create new user
+        db.users.insert_one({
+            'username': username,
+            'password': GlobalBcrypt.instance.generate_hash(password),
+        })
 
-def get_dog_dashboard_two_screens_readonly():
-    # get all necessary values
-    timer_since_last_out = home_assistant_helper.get_home_assistant_value("input_datetime.last_time_out")
-    last_peed = home_assistant_helper.get_home_assistant_value("input_datetime.dog_last_peed")
-    last_pooped = home_assistant_helper.get_home_assistant_value("input_datetime.dog_last_pooped")
-    last_fed = home_assistant_helper.get_home_assistant_value("input_datetime.last_fed")
+    # see if device exists
+    existing_device = db.devices.find_one({'deviceId': device_id})
 
-    utc_time = datetime.now(timezone.utc)
+    device_config = DEFAULT_DEVICE_CONFIG
 
-    last_out_time = datetime.fromisoformat(timer_since_last_out['last_reported'])
-    try:
-        last_out_time = datetime.fromisoformat(timer_since_last_out['attributes']['finishes_at'])
-    except KeyError:
-        pass
+    # If user is new to device, overwrite devie config with defaults, otherwise keep existing device config
+    if existing_device is not None:
+        if existing_device['username'] != username:
+            device_config = DEFAULT_DEVICE_CONFIG
+        else:
+            device_config = existing_device['deviceConfig']
+    
+    # Register user to device
+    db.devices.update_one(
+        {'deviceId': device_id},
+        {'$set': {
+            'username': username,
+            'deviceConfig': device_config,
+        }},
+        upsert=True
+    )
+    return device_config
+    # TODO more complex login logic
+    # See if a user already exists with given username associated with any device
+    # if user exists, passwords must match
+    # See if device is already registered to a different account
 
-    # format response for display
-    screen_one = {
-        'text': f'''Last out
-{utils.pretty_print_time_between(last_out_time, utc_time)}
-
-Last fed
-{utils.pretty_print_time_between(datetime.fromtimestamp(last_fed['attributes']['timestamp'], tz=timezone.utc), utc_time)}'''
-    }
-
-    screen_two = {
-        'text': f'''Last peed
-{utils.pretty_print_time_between(datetime.fromtimestamp(last_peed['attributes']['timestamp'], tz=timezone.utc), utc_time)}
-
-Last pooped
-{utils.pretty_print_time_between(datetime.fromtimestamp(last_pooped['attributes']['timestamp'], tz=timezone.utc), utc_time)}'''
-    }
-
-    return {
-        'screen_one': screen_one,
-        'screen_two': screen_two,
-    }
-        
+def get_config(device_id):
+    device = db.devices.find_one({'deviceId': device_id})
+    return device['deviceConfig']

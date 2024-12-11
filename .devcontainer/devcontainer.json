@@ -11,13 +11,21 @@
   "customizations": {
     "vscode": {
       "settings": {
-        "terminal.integrated.defaultProfile.linux": "zsh"
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "python.terminal.activateEnvInCurrentTerminal": false,
+        "python.defaultInterpreterPath": "./server/.venv/bin/python"
+      
       },
       "extensions": [
-        "mkhl.direnv"
+        "mkhl.direnv",
+        "ms-python.python"
       ]
     }
   },
+  "appPort": [
+    "4352:3000",
+    "4353:3001"
+  ],
   "runArgs": [
     "--name",
     "desk-buddy_devcontainer"

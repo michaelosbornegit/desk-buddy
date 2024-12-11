@@ -1,7 +1,6 @@
-from app.dashboard import routes as routes
-from app.dashboard import services as services
-
 from flask import Blueprint
 
-bp = Blueprint("dashboards", __name__)
+bp = Blueprint("devices", __name__)
 
+from app.devices import routes as routes
+from app.devices import services as services

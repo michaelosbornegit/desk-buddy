@@ -3,8 +3,10 @@
 **/node_modules
 **/.DS_Store
 **/build
-**/.env
+**/.venv
+**/.ruff_cache
 **/env
+**/.env
 **/venv
 **/dist
 **/latestBuild.zip

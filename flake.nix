@@ -16,7 +16,8 @@
         };
       in pkgs.mkShell {
         buildInputs = with pkgs; [
-          zsh
+          entr
+          nodejs_22
         ];
       };
     in

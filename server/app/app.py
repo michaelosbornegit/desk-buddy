@@ -1,9 +1,11 @@
 from flask import Flask
 from flask_cors import CORS
 from flask_socketio import SocketIO
+from flask_bcrypt import Bcrypt
 
 from config import Config
 from app import socketio_instance
+from app import bcrypt as global_bcrypt
 
 
 def create_app(testing=False):
@@ -19,6 +21,9 @@ def create_app(testing=False):
     app.secret_key = Config.SESSION_KEY
 
     # Initialize Flask extensions
+    bcrypt = Bcrypt(app)
+    global_bcrypt.instance.init(bcrypt)
+
     socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
     socketio_instance.instance.init(socketio)
 
@@ -29,8 +34,9 @@ def create_app(testing=False):
 
     # Register blueprints
     from app.dashboard import bp as dashboard_bp
-
-    app.register_blueprint(dashboard_bp, url_prefix="/dashboard")
+    app.register_blueprint(dashboard_bp, url_prefix="/dashboards")
+    from app.devices import bp as devices_bp
+    app.register_blueprint(devices_bp, url_prefix="/devices")
 
     @app.route("/", methods=["GET"])
     def status():
