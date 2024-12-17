@@ -10,7 +10,7 @@
 # https://github.com/mark-gladding/packed-font
 #
 
-from display.PiicoDev_SSD1306 import *
+from display.PD_SSD1306 import *
 import math
 import display.packed_font as packed_font
 import struct

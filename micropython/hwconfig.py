@@ -1,5 +1,5 @@
 from machine import Pin
-from display.enhanced_display import Enhanced_Display
+from display.enh_display import Enhanced_Display
 
 DISPLAY = Enhanced_Display(bus=0, sda=Pin(6), scl=Pin(7))
 

@@ -1,5 +1,5 @@
 from machine import Pin
-from display.enhanced_display import Enhanced_Display
+from display.enh_display import Enhanced_Display
 import time
 import network
 import requests
@@ -50,7 +50,7 @@ def main():
                     with open(firmware['relative_path'], 'wb') as f:
                         print(f'Writing firmware to {firmware["relative_path"]}')
                         f.write(firmware_response.content)
-                    nvs.set_i32(firmware['relative_path'], firmware['version'])
+                    nvs.set_i32(firmware['file_name'].rsplit('.', 1)[0], firmware['version'])
                     nvs_modified = True
             
             if nvs_modified:
@@ -66,6 +66,8 @@ def main():
             DISPLAY.text("x.x", 0, 32, 1, 0, 128, 64, 0)
             DISPLAY.text("Restarting in 5s...", 0, 48, 1, 0, 128, 64, 0)
             DISPLAY.show()
+            print(e)
+            print('irrecoverable error, restarting...')
             time.sleep(5)
 
 main()
