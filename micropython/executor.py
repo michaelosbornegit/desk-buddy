@@ -37,17 +37,6 @@ def connectToNetwork():
             pass
     print('Network config:', sta_if.ipconfig('addr4'))
 
-def register():
-    response = requests.post(f'{api_host}/devices/register', headers={'Authorization': device_secret},
-                             json={'deviceId': device_id, 'username': 'test', 'password': 'test'})
-
-    if response.status_code == 200:
-        print('Registered successfully')
-    else:
-        print('Failed to register')
-        
-    return response.json()
-
 def display_raw(raw_data):
     global current_raw_display, last_raw_display
 
@@ -123,11 +112,19 @@ def set_current_raw_display(raw_display):
     global current_raw_display
     current_raw_display = raw_display
 
+def register():
+    response = requests.post(f'{api_host}/devices/register', headers={'Authorization': device_secret},
+                             json={'deviceId': device_id, 'username': 'test', 'password': 'test'})
+
+    if response.status_code == 200:
+        print('Registered successfully')
+    else:
+        raise Exception(f'Error registering: {response.status_code}')
+        
+    return response.json()
+
 async def main():
     global activities, current_device_config, on_dashboard, current_task, button_click, button_long_press, current_activity, selected_menu_item
-    # TODO Do the whole captive portal wifi thing
-
-    connectToNetwork()
 
     current_device_config = register()
 
