@@ -9,6 +9,7 @@ from secrets import ssid, ssid_password, device_secret, api_host, device_id
 from hwconfig import DISPLAY, BUTTON, LED
 from dashboard import Dashboard
 from menu import Menu
+from global_classes import Hardware, Functions, Secrets
 
 # User configurable constants
 DEVICE_CYCLE_INTERVAL_MS = 10 # how often the main while loop runs, play with this to get the best performance
@@ -130,15 +131,13 @@ async def main():
 
     current_device_config = register()
 
-    # Initialize activities
-    secrets = {
-        'device_secret': device_secret,
-        'api_host': api_host,
-        'device_id': device_id
-    }
+    hardware = Hardware(DISPLAY, LED, BUTTON)
+    functions = Functions(set_current_raw_display, switch_activity, get_current_device_config)
+    secrets = Secrets(device_secret, api_host, device_id)
+
     activities = [
-        Dashboard('DASHBOARD', DISPLAY, LED, set_current_raw_display, switch_activity, get_current_device_config, secrets),
-        Menu('MENU', DISPLAY, LED, set_current_raw_display, switch_activity, get_current_device_config, secrets)
+        Dashboard('DASHBOARD', hardware, functions, secrets),
+        Menu('MENU', hardware, functions, secrets)
     ]
 
     await switch_activity('DASHBOARD')
@@ -182,8 +181,6 @@ async def main():
             # Draw raw content if an activity is using it
             if current_raw_display is not None:
                 display_raw(current_raw_display)
-                
-
 
         
         # Just show once per device cycle

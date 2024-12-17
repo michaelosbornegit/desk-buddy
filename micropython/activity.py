@@ -1,13 +1,11 @@
+from global_classes import Hardware, Functions, Secrets
+
 class Activity:
-    
-    def __init__(self, name, display, led, set_current_raw_display, switch_activity, get_current_device_config, secrets):
+    def __init__(self, name, hardware, functions, secrets):
         self.name = name
-        self.display = display
-        self.led = led
-        self.set_current_raw_display = set_current_raw_display
-        self.switch_activity = switch_activity
-        self.get_current_device_config = get_current_device_config
-        self.secrets = secrets
+        self.hardware: Hardware = hardware
+        self.functions: Functions = functions
+        self.secrets: Secrets = secrets
 
     async def render(self):
         raise NotImplementedError("Subclasses must implement 'render' method.")

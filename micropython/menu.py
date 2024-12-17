@@ -5,13 +5,13 @@ import requests
 from activity import Activity
 
 class Menu(Activity):
-    def __init__(self, name, display, led, set_current_raw_display, switch_activity, get_current_device_config, secrets):
-        super().__init__(name, display, led, set_current_raw_display, switch_activity, get_current_device_config, secrets)
+    def __init__(self, name, hardware, functions, secrets):
+        super().__init__(name, hardware, functions, secrets)
         # Set up instance specific variables
         self.selected_menu_item = 0
     
     async def render(self):
-        menu_items = self.get_current_device_config()['menu']
+        menu_items = self.functions.get_current_device_config()['menu']
 
         raw_menu_items = []
 
@@ -49,24 +49,24 @@ class Menu(Activity):
                         ]
                     })
         
-        self.set_current_raw_display(raw_menu_items)
+        self.functions.set_current_raw_display(raw_menu_items)
     
     async def button_click(self):
         # Cycle through menu items
-        if self.selected_menu_item == len(self.get_current_device_config()['menu']) - 1:
+        if self.selected_menu_item == len(self.functions.get_current_device_config()['menu']) - 1:
             self.selected_menu_item = 0
         else:
             self.selected_menu_item += 1
         pass
 
     async def button_long_click(self):
-        if self.selected_menu_item == len(self.get_current_device_config()['menu']) - 1:
-            self.display.fill_rect(0, 0, 128, 64, 0)
-            await self.switch_activity('DASHBOARD')
+        if self.selected_menu_item == len(self.functions.get_current_device_config()['menu']) - 1:
+            self.hardware.display.fill_rect(0, 0, 128, 64, 0)
+            await self.functions.switch_activity('DASHBOARD')
         pass
 
     async def on_mount(self):
-        self.display.fill_rect(0, 0, 128, 64, 0)
+        self.hardware.display.fill_rect(0, 0, 128, 64, 0)
         pass
 
     async def on_unmount(self):
