@@ -7,6 +7,8 @@ import esp32
 import sys
 from secrets import ssid, ssid_password, device_secret, api_host, device_id
 
+from firmware import firmware_check, firmware_update
+
 DISPLAY = Enhanced_Display(bus=0, sda=Pin(6), scl=Pin(7))
 NVS_NAMESPACE = 'storage'
 nvs = esp32.NVS(NVS_NAMESPACE)
@@ -39,24 +41,8 @@ def main():
             connectToNetwork()
             device_config = register()
 
-            nvs_modified = False
-            # Check if we need to update firmware
-            for firmware in device_config['firmware']:
-                print(f'Checking firmware {firmware["file_name"]}...')
-                file_name = firmware['file_name']
-                try:
-                    nvs.get_i32(file_name)
-                except OSError: # key doesn't exist
-                    # download and save file contents
-                    firmware_response = requests.get(f'{api_host}/devices/firmware/{file_name}', headers={'Authorization': device_secret})
-                    with open(firmware['relative_path'], 'wb') as f:
-                        print(f'Writing firmware to {firmware["relative_path"]}')
-                        f.write(firmware_response.content)
-                        nvs.set_i32(file_name, firmware['version'])
-                        nvs_modified = True
-
-            if nvs_modified:
-                nvs.commit()
+            # Update firmware on boot
+            firmware_update(device_config)
 
             import executor
             executor.main()
