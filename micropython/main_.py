@@ -4,6 +4,7 @@ import time
 import network
 import requests
 import esp32
+import sys
 from secrets import ssid, ssid_password, device_secret, api_host, device_id
 
 DISPLAY = Enhanced_Display(bus=0, sda=Pin(6), scl=Pin(7))
@@ -28,7 +29,7 @@ def register():
         print('Registered successfully')
     else:
         raise Exception(f'Error registering: {response.status_code}')
-        
+
     return response.json()
 
 def main():
@@ -41,21 +42,22 @@ def main():
             nvs_modified = False
             # Check if we need to update firmware
             for firmware in device_config['firmware']:
+                print(f'Checking firmware {firmware["file_name"]}...')
+                file_name = firmware['file_name']
                 try:
-                    nvs.get_i32(firmware['relative_path'])
+                    nvs.get_i32(file_name)
                 except OSError: # key doesn't exist
                     # download and save file contents
-                    firmware_response = requests.get(f'{api_host}/firmware/{firmware["relative_path"]}', headers={'Authorization': device_secret})
-                    
+                    firmware_response = requests.get(f'{api_host}/devices/firmware/{file_name}', headers={'Authorization': device_secret})
                     with open(firmware['relative_path'], 'wb') as f:
                         print(f'Writing firmware to {firmware["relative_path"]}')
                         f.write(firmware_response.content)
-                    nvs.set_i32(firmware['file_name'].rsplit('.', 1)[0], firmware['version'])
-                    nvs_modified = True
-            
+                        nvs.set_i32(file_name, firmware['version'])
+                        nvs_modified = True
+
             if nvs_modified:
                 nvs.commit()
-                
+
             import executor
             executor.main()
             break
@@ -66,7 +68,7 @@ def main():
             DISPLAY.text("x.x", 0, 32, 1, 0, 128, 64, 0)
             DISPLAY.text("Restarting in 5s...", 0, 48, 1, 0, 128, 64, 0)
             DISPLAY.show()
-            print(e)
+            sys.print_exception(e)
             print('irrecoverable error, restarting...')
             time.sleep(5)
 
