@@ -31,6 +31,9 @@ def firmware_update(device_config):
 
     for firmware in device_config['firmware']:
         update_available = _check_for_update(firmware)
+        # don't allow writing important micropython firmware files
+        if firmware['file_name'] in ['boot.py', 'main.py', 'firmware.py', 'secrets.py']:
+            raise Exception(f'Firmware updater tried something forbidden: overwriting {firmware["file_name"]}')
         if update_available:
             firmware_response = requests.get(f'{api_host}/devices/firmware/{firmware['file_name']}', headers={'Authorization': device_secret})
             with open(firmware['relative_path'], 'wb') as f:

@@ -1,13 +1,13 @@
 from machine import Pin
-from display.enh_display import Enhanced_Display
 import time
 import network
 import requests
 import esp32
 import sys
-from secrets import ssid, ssid_password, device_secret, api_host, device_id
 
-from firmware import firmware_check, firmware_update
+from display.enh_display import Enhanced_Display
+from secrets import ssid, ssid_password, device_secret, api_host, device_id
+from osb_firmware import firmware_update
 
 DISPLAY = Enhanced_Display(bus=0, sda=Pin(6), scl=Pin(7))
 NVS_NAMESPACE = 'storage'
