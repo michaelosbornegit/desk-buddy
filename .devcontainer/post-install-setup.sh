@@ -1,3 +1,5 @@
+# -------- BOILERPLATE SETUP --------
+
 # Own workspaces
 sudo chown -R vscode /workspaces
 
@@ -13,7 +15,16 @@ echo 'znap source marlonrichert/zsh-autocomplete' >> ~/.zshrc && \
     echo 'znap source zsh-users/zsh-autosuggestions' >> ~/.zshrc && \
     echo 'znap source zsh-users/zsh-syntax-highlighting' >> ~/.zshrc
 
-curl -LsSf https://astral.sh/uv/install.sh | sh
+# Add direnv to bash
+echo 'eval "$(direnv hook bash)"' >> ~/.bashrc
 
 # Add direnv to zsh
 echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc
+
+# Make zsh the default shell
+sudo chsh -s /usr/bin/zsh
+
+# -------- REPOSITORY SPECIFIC SETUP --------
+
+# Install uv cause the version in nix is old
+curl -LsSf https://astral.sh/uv/install.sh | sh

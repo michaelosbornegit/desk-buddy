@@ -67,6 +67,7 @@ def display_raw(raw_data):
                 else:
                     # if content, must be text
                     if (child_font):
+                        print(child_font)
                         DISPLAY.load_font(child_font)
 
                     DISPLAY.select_font(child_font)

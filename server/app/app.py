@@ -2,10 +2,13 @@ from flask import Flask
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from flask_bcrypt import Bcrypt
+from apscheduler.schedulers.background import BackgroundScheduler
+from flask_apscheduler import APScheduler
 
 from config import Config
 from app import socketio_instance
 from app import bcrypt as global_bcrypt
+from app.jobs.background_jobs import update_firmware
 
 
 def create_app(testing=False):
@@ -23,6 +26,17 @@ def create_app(testing=False):
     # Initialize Flask extensions
     bcrypt = Bcrypt(app)
     global_bcrypt.instance.init(bcrypt)
+
+    scheduler = APScheduler()
+    scheduler.init_app(app)
+    scheduler.start()
+
+    scheduler.add_job(
+        id="update_firmware",
+        func=update_firmware,
+        trigger="interval",
+        seconds=2,
+    )
 
     socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
     socketio_instance.instance.init(socketio)

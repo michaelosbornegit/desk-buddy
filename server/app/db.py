@@ -7,3 +7,4 @@ class db:
     __database = __mongo_client[Config.MONGO_DATABASE]
     devices = __database["devices"]
     users = __database["users"]
+    software_versions = __database["software_versions"]

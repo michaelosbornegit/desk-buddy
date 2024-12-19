@@ -18,6 +18,7 @@
         buildInputs = with pkgs; [
           entr
           nodejs_22
+          tmux
         ];
       };
     in

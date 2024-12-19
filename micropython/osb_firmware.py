@@ -1,5 +1,6 @@
 import esp32
 import requests
+import os
 
 from secrets import device_secret, api_host
 
@@ -12,7 +13,7 @@ def _check_for_update(firmware):
     update_available = False
     try:
         currentDeviceVersion = nvs.get_i32(file_name)
-        if firmware['version'] > currentDeviceVersion:
+        if firmware['version'] == currentDeviceVersion:
             update_available = True
     except OSError: # key doesn't exist
         update_available = True
@@ -37,6 +38,9 @@ def firmware_update(device_config):
         if update_available:
             firmware_response = requests.get(f'{api_host}/devices/firmware/{firmware['file_name']}', headers={'Authorization': device_secret})
             with open(firmware['relative_path'], 'wb') as f:
+                dir_name = os.path.dirname(firmware['relative_path'])
+                if dir_name and not os.path.exists(dir_name):
+                    os.makedirs(dir_name)
                 print(f'Writing firmware to {firmware["relative_path"]}')
                 f.write(firmware_response.content)
                 nvs.set_i32(firmware['file_name'], firmware['version'])

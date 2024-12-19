@@ -1,3 +1,4 @@
+from fileinput import filename
 from app.db import db
 from datetime import datetime, timezone
 from app.bcrypt import GlobalBcrypt
@@ -69,6 +70,13 @@ DEFAULT_DEVICE_CONFIG = {
             'configFetchInterval': 10 * 1000,
     }
 
+def get_firmware():
+    firmware = list(db.software_versions.find(
+        {'type': 'firmware'},
+        {'_id': 0, 'file_name': 1, 'relative_path': 1, 'version': 1}
+    ))
+    print('Firmware:', firmware)
+    return firmware
 
 def register_device(request_data):
     device_id = request_data['deviceId']
@@ -110,6 +118,9 @@ def register_device(request_data):
         }},
         upsert=True
     )
+
+    device_config['firmware'] = get_firmware()
+
     return device_config
     # TODO more complex login logic
     # See if a user already exists with given username associated with any device
@@ -118,4 +129,14 @@ def register_device(request_data):
 
 def get_config(device_id):
     device = db.devices.find_one({'deviceId': device_id})
-    return device['deviceConfig']
+    device_config = device['deviceConfig']
+    device_config['firmware'] = get_firmware()
+    return device_config
+
+def get_firmware_contents(file_name):   
+    firmware = db.software_versions.find_one(
+        {'file_name': file_name},
+        {'_id': 0, 'contents': 1}
+    )
+
+    return firmware

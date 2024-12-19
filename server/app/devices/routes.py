@@ -14,3 +14,9 @@ def register_device():
 @device_auth()
 def get_config(device_id):
     return services.get_config(device_id)
+
+@bp.route("firmware/<file_name>", methods=["GET"])
+@device_auth()
+def get_firmware_contents(file_name):
+    file = services.get_firmware_contents(file_name)
+    return file["contents"]
