@@ -7,13 +7,36 @@ from secrets import device_secret, api_host
 NVS_NAMESPACE = 'storage'
 nvs = esp32.NVS(NVS_NAMESPACE)
 
+def makedirs(path):
+    """Recursively create directories, ignoring the file part if present."""
+    # Get the directory part of the path
+    directory, _ = os.path.split(path)  # Split into (dir, file_or_empty)
+    if not directory:
+        return  # If no directory part, nothing to do
+
+    # Split the directory into parts and create them one by one
+    parts = directory.split('/')
+    current_path = ""
+    
+    for part in parts:
+        if part:  # Skip empty parts (e.g., from leading './' or '/')
+            current_path += f"{part}/"
+            try:
+                os.mkdir(current_path)
+            except OSError as e:
+                # Ignore error if directory already exists
+                if e.args[0] != 17:  # 17 is 'EEXIST' error code
+                    raise
+
 def _check_for_update(firmware):
     file_name = firmware['file_name']
     currentDeviceVersion = 0
     update_available = False
     try:
         currentDeviceVersion = nvs.get_i32(file_name)
-        if firmware['version'] == currentDeviceVersion:
+        # if firmware['version'] > currentDeviceVersion:
+        # debugging, always overwrite
+        if True:
             update_available = True
     except OSError: # key doesn't exist
         update_available = True
@@ -38,9 +61,7 @@ def firmware_update(device_config):
         if update_available:
             firmware_response = requests.get(f'{api_host}/devices/firmware/{firmware['file_name']}', headers={'Authorization': device_secret})
             with open(firmware['relative_path'], 'wb') as f:
-                dir_name = os.path.dirname(firmware['relative_path'])
-                if dir_name and not os.path.exists(dir_name):
-                    os.makedirs(dir_name)
+                makedirs(firmware['relative_path'])
                 print(f'Writing firmware to {firmware["relative_path"]}')
                 f.write(firmware_response.content)
                 nvs.set_i32(firmware['file_name'], firmware['version'])
