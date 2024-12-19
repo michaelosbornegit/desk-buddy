@@ -8,18 +8,19 @@ NVS_NAMESPACE = 'storage'
 nvs = esp32.NVS(NVS_NAMESPACE)
 
 def makedirs(path):
-    """Recursively create directories, ignoring the file part if present."""
-    # Get the directory part of the path
-    directory, _ = os.path.split(path)  # Split into (dir, file_or_empty)
-    if not directory:
-        return  # If no directory part, nothing to do
+    """Recursively create directories, handling paths without os.path."""
+    # Normalize the path and remove the file part if present
+    if not path.endswith('/'):
+        path = '/'.join(path.split('/')[:-1])  # Remove the last component (file name)
+    if not path:
+        return  # If the path becomes empty, nothing to do
 
-    # Split the directory into parts and create them one by one
-    parts = directory.split('/')
+    # Split the path into components and create directories
+    parts = path.split('/')
     current_path = ""
     
     for part in parts:
-        if part:  # Skip empty parts (e.g., from leading './' or '/')
+        if part:  # Skip empty parts
             current_path += f"{part}/"
             try:
                 os.mkdir(current_path)
