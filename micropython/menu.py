@@ -12,6 +12,7 @@ class Menu(Activity):
     
     async def render(self):
         menu_items = self.functions.get_current_device_config()['menu']
+        print('Menu items:', menu_items)
 
         raw_menu_items = []
 

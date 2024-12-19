@@ -78,6 +78,73 @@ def get_firmware():
     print('Firmware:', firmware)
     return firmware
 
+def build_apps_menu():
+    apps = list(db.software_versions.find(
+        {'type': 'app'},
+    ).sort('relative_path', 1))
+
+    menu_item = {
+        'label': 'Apps',
+        'children': []
+    }
+
+    for app in apps:
+        directories = app['relative_path'].split('/')[:-1]
+        # Support at most double nesting
+        if len(directories) == 2:
+            parent = next((child for child in menu_item['children'] if child['label'] == directories[0]), None)
+            if parent is None:
+                parent = {
+                    'label': directories[0],
+                    'children': []
+                }
+            child = next((child for child in parent['children'] if child['label'] == directories[1]), None)
+            if child is None:
+                child = {
+                    'label': directories[1],
+                    'children': []
+                }
+                parent['children'].append(child)
+            child['children'].append({
+                'label': app['relative_path'].split('/')[-1],
+                'action': 'fetchExec',
+                'path': app['relative_path'],
+            })
+            menu_item['children'].append(parent)
+        elif len(directories) == 1:
+            parent = next((child for child in menu_item['children'] if child['label'] == directories[0]), None)
+            if parent is None:
+                parent = {
+                    'label': directories[0],
+                    'children': []
+                }
+            parent['children'].append({
+                'label': app['relative_path'].split('/')[-1],
+                'action': 'fetchExec',
+                'path': app['relative_path'],
+            })
+            menu_item['children'].append(parent)
+        else:
+            menu_item['children'].append({
+                'label': app['relative_path'],
+                'action': 'fetchExec',
+                'path': app['relative_path'],
+            })
+    
+    return menu_item
+
+
+def build_main_menu():
+    menu = [
+        {
+            # TODO make notification firmware
+            'label': '0 Notifications',
+        },
+        build_apps_menu(),
+    ]
+
+    return menu
+
 def register_device(request_data):
     device_id = request_data['deviceId']
     username = request_data['username']
@@ -131,6 +198,7 @@ def get_config(device_id):
     device = db.devices.find_one({'deviceId': device_id})
     device_config = device['deviceConfig']
     device_config['firmware'] = get_firmware()
+    device_config['menu'] = build_main_menu()
     return device_config
 
 def get_firmware_contents(file_name):   

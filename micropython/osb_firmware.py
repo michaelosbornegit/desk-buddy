@@ -10,24 +10,23 @@ nvs = esp32.NVS(NVS_NAMESPACE)
 def makedirs(path):
     """Recursively create directories, handling paths without os.path."""
     # Normalize the path and remove the file part if present
-    if not path.endswith('/'):
-        path = '/'.join(path.split('/')[:-1])  # Remove the last component (file name)
-    if not path:
+    path = '/'.join(path.split('/')[:-1])  # Remove the last component (file name)
+    if path == '/':
         return  # If the path becomes empty, nothing to do
 
     # Split the path into components and create directories
     parts = path.split('/')
-    current_path = ""
+    current_path = "/"
     
     for part in parts:
-        if part:  # Skip empty parts
-            current_path += f"{part}/"
-            try:
-                os.mkdir(current_path)
-            except OSError as e:
-                # Ignore error if directory already exists
-                if e.args[0] != 17:  # 17 is 'EEXIST' error code
-                    raise
+        current_path += f"{part}"
+        try:
+            os.mkdir(current_path)
+        except OSError as e:
+            # Ignore error if directory already exists
+            if e.args[0] != 17:  # 17 is 'EEXIST' error code
+                raise
+        current_path += "/"
 
 def _check_for_update(firmware):
     file_name = firmware['file_name']
@@ -36,7 +35,7 @@ def _check_for_update(firmware):
     try:
         currentDeviceVersion = nvs.get_i32(file_name)
         # if firmware['version'] > currentDeviceVersion:
-        # debugging, always overwrite
+        # for debugging
         if True:
             update_available = True
     except OSError: # key doesn't exist
@@ -60,9 +59,13 @@ def firmware_update(device_config):
         if firmware['file_name'] in ['boot.py', 'main.py', 'firmware.py', 'secrets.py']:
             raise Exception(f'Firmware updater tried something forbidden: overwriting {firmware["file_name"]}')
         if update_available:
-            firmware_response = requests.get(f'{api_host}/devices/firmware/{firmware['file_name']}', headers={'Authorization': device_secret})
+            firmware_response = requests.get(f'{api_host}/devices/firmware/{firmware["file_name"]}', headers={'Authorization': device_secret})
+            
+            # Ensure directories exist before opening the file
+            makedirs(firmware['relative_path'])
+            
+            # Write the file
             with open(firmware['relative_path'], 'wb') as f:
-                makedirs(firmware['relative_path'])
                 print(f'Writing firmware to {firmware["relative_path"]}')
                 f.write(firmware_response.content)
                 nvs.set_i32(firmware['file_name'], firmware['version'])

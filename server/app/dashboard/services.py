@@ -28,7 +28,7 @@ def get_dashboard(device_id):
                     },
                     {
                         'content': '\x59',
-                        'font': 'dripicons-v2-16-split1',
+                        'font': 'icons-16-1',
                     }
                 ]
             })
