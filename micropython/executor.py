@@ -1,3 +1,4 @@
+from app.flappybuddy import FlappyBuddy
 import network
 import requests
 import utime
@@ -23,9 +24,6 @@ activities = []
 current_activity = None
 button_long_press = False
 button_click = False
-in_sub_menu = None
-
-selected_menu_item = 0
 
 def connectToNetwork():
     sta_if = network.WLAN(network.STA_IF)
@@ -92,6 +90,11 @@ def button_pressed(event):
 def get_current_device_config():
     return current_device_config
 
+def set_current_raw_display(raw_display):
+    global current_raw_display, last_raw_display
+    current_raw_display = raw_display
+    last_raw_display = None
+
 async def switch_activity(activity_name):
     global activities, current_activity
     new_activity = None
@@ -102,15 +105,11 @@ async def switch_activity(activity_name):
     
     if new_activity:
         if current_activity:
-            current_activity.on_unmount()
-        new_activity.on_mount()
+            await current_activity.on_unmount()
+        await new_activity.on_mount()
         current_activity = new_activity
     else:
         print(f'Activity {activity_name} not found')
-
-def set_current_raw_display(raw_display):
-    global current_raw_display
-    current_raw_display = raw_display
 
 def register():
     response = requests.post(f'{api_host}/devices/register', headers={'Authorization': device_secret},
@@ -124,7 +123,7 @@ def register():
     return response.json()
 
 async def main():
-    global activities, current_device_config, on_dashboard, current_task, button_click, button_long_press, current_activity, selected_menu_item
+    global activities, current_activity, current_device_config, on_dashboard, current_task, button_click, button_long_press
 
     current_device_config = register()
 
@@ -134,14 +133,17 @@ async def main():
 
     activities = [
         Dashboard('DASHBOARD', hardware, functions, secrets),
-        Menu('MENU', hardware, functions, secrets)
+        Menu('MENU', hardware, functions, secrets),
+        FlappyBuddy('FLAPPYBUDDY', hardware, functions, secrets)
     ]
 
-    await switch_activity('DASHBOARD')
+    # await switch_activity('DASHBOARD')
+    # debugging
+    await switch_activity('FLAPPYBUDDY')
 
     button_held_time = 0
     last_fetch_time = utime.ticks_ms()
-    while True:        
+    while True:  
         # Check if button is being held, give button actions priority
         if not BUTTON.value():
             button_held_time += DEVICE_CYCLE_INTERVAL_MS
@@ -165,7 +167,7 @@ async def main():
             DISPLAY.fill_rect(0, 62, 128, 2, 0)
             button_held_time = 0
 
-            # No we can do anything unrelated to buttons
+            # Now we can do anything unrelated to buttons
             # Refresh config every fetchInterval
             if current_activity.name == 'DASHBOARD':
                 if utime.ticks_diff(utime.ticks_ms(), last_fetch_time) > current_device_config['configFetchInterval']:

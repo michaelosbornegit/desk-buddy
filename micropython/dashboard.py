@@ -33,14 +33,19 @@ class Dashboard(Activity):
         pass
 
     async def button_long_click(self):
+        await self.current_task
         await self.functions.switch_activity('MENU')
-        pass
 
     async def on_mount(self):
+        if self.current_task:
+            await self.current_task
+            self.current_task.cancel()
+            self.current_task = None
+        self.last_fetch_time = utime.ticks_ms()
         self.current_task = asyncio.create_task(self.fetch_dashboard())
-        pass
 
     async def on_unmount(self):
-        # clean up
-        self.functions.set_current_raw_display([])
-        pass
+        if self.current_task:
+            await self.current_task
+            self.current_task.cancel()
+            self.current_task = None
