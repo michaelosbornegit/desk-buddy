@@ -38,7 +38,6 @@ def register():
 def main():
     while True:
         try:
-            # TODO Do the whole captive portal wifi thing
             connectToNetwork()
 
             # Install necessary modules
@@ -49,20 +48,25 @@ def main():
             # Update firmware on boot
             firmware_update(device_config)
 
-            import executor
-            executor.main()
+            # Import executor safely
+            if 'executor' in sys.modules:
+                del sys.modules['executor']
+            __import__('executor')
             break
+        except KeyError as e:
+            print(f"KeyError: {e} - Check if 'executor.py' exists and is properly named.")
         except Exception as e:
             DISPLAY.clear()
-            DISPLAY.text("Desk Buddy", 0, 0, 1, 0, 128, 64, 0)
-            DISPLAY.text("encountered an", 0, 16, 1, 0, 128, 64, 0)
-            DISPLAY.text("irrecoverable error", 0, 32, 1, 0, 128, 64, 0)
-            DISPLAY.text("x.x", 0, 32, 1, 0, 128, 64, 0)
-            DISPLAY.text("Restarting in 5s...", 0, 48, 1, 0, 128, 64, 0)
+            DISPLAY.text("Desk Buddy", 0, 0, 1, 0, 128, 64, 1)
+            DISPLAY.text("encountered an", 0, 8, 1, 0, 128, 64, 1)
+            DISPLAY.text("irrecoverable", 0, 16, 1, 0, 128, 64, 1)
+            DISPLAY.text("error", 0, 24, 1, 0, 128, 64, 1)
+            DISPLAY.text("x.x", 0, 40, 1, 0, 128, 64, 1)
+            DISPLAY.text("Restarting...", 0, 56, 1, 0, 128, 64, 1)
             DISPLAY.show()
             sys.print_exception(e)
             print('irrecoverable error, restarting...')
             time.sleep(5)
-        del sys.modules['executor']
+
 
 main()
