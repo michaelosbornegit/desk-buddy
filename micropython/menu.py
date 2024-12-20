@@ -1,6 +1,7 @@
 import utime
 import asyncio
 import requests
+import copy
 
 from activity import Activity
 
@@ -9,18 +10,23 @@ class Menu(Activity):
         super().__init__(name, hardware, functions, secrets)
         # Set up instance specific variables
         self.selected_menu_item = 0
+        self.current_sub_menu = None
     
     async def render(self):
         menu_items = self.functions.get_current_device_config()['menu']
-        print('Menu items:', menu_items)
 
-        raw_menu_items = []
+        # Deep clone menu_items
+        menu_items = copy.deepcopy(menu_items)
+
+        menu_items.append({
+            'label': 'Back'
+        })
 
         # First, convert to raw menu items to display
-        for index, item in enumerate(menu_items):
+        for index, item in enumerate(list(reversed(menu_items))):
             if index == self.selected_menu_item:
                 # put inverted box to show its selected
-                raw_menu_items.append({
+                self.current_raw_menu.append({
                     'height': 16,
                     'font': 'text-16',
                     'children': [
@@ -38,7 +44,7 @@ class Menu(Activity):
                     ]
                 })
             else:
-                raw_menu_items.append({
+                self.current_raw_menu.append({
                         'height': 16,
                         'font': 'text-16',
                         'children': [
@@ -49,27 +55,24 @@ class Menu(Activity):
                             }
                         ]
                     })
-        
-        self.functions.set_current_raw_display(raw_menu_items)
+
+        self.current_raw_menu = list(reversed(self.current_raw_menu))
+        self.functions.set_current_raw_display(self.current_raw_menu)
     
     async def button_click(self):
         # Cycle through menu items
-        if self.selected_menu_item == len(self.functions.get_current_device_config()['menu']) - 1:
+        if self.selected_menu_item == len(self.current_raw_menu) - 1:
             self.selected_menu_item = 0
         else:
             self.selected_menu_item += 1
-        pass
 
     async def button_long_click(self):
-        if self.selected_menu_item == len(self.functions.get_current_device_config()['menu']) - 1:
-            self.hardware.display.fill_rect(0, 0, 128, 64, 0)
+        if self.selected_menu_item == len(self.current_raw_menu) - 1:
+            self.hardware.display.clear()
             await self.functions.switch_activity('DASHBOARD')
-        pass
 
     async def on_mount(self):
-        self.hardware.display.fill_rect(0, 0, 128, 64, 0)
-        pass
+        self.hardware.display.clear()
 
     async def on_unmount(self):
         self.selected_menu_item = 0
-        pass

@@ -34,9 +34,9 @@ def _check_for_update(firmware):
     update_available = False
     try:
         currentDeviceVersion = nvs.get_i32(file_name)
-        # if firmware['version'] > currentDeviceVersion:
-        # for debugging
-        if True:
+        if firmware['version'] > currentDeviceVersion:
+        # for debugging, always upload all files
+        # if True:
             update_available = True
     except OSError: # key doesn't exist
         update_available = True

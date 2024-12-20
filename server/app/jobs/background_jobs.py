@@ -19,7 +19,7 @@ def update_firmware():
                 existing_entry = db.software_versions.find_one({'relative_path': relative_path, 'file_name': file_name})
 
                 type = 'firmware'
-                if 'app/' in file_path:
+                if relative_path.startswith('app/'):
                     type = 'app'
 
                 if existing_entry:

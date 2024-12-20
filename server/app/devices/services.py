@@ -67,7 +67,7 @@ DEFAULT_DEVICE_CONFIG = {
                     'action': 'home',
                 },
             ],
-            'configFetchInterval': 10 * 1000,
+            'configFetchInterval': 1000,
     }
 
 def get_firmware():
@@ -89,7 +89,7 @@ def build_apps_menu():
     }
 
     for app in apps:
-        directories = app['relative_path'].split('/')[:-1]
+        directories = app['relative_path'].split('/')[1:-1]
         # Support at most double nesting
         if len(directories) == 2:
             parent = next((child for child in menu_item['children'] if child['label'] == directories[0]), None)
@@ -98,6 +98,7 @@ def build_apps_menu():
                     'label': directories[0],
                     'children': []
                 }
+                menu_item['children'].append(parent)  # Append parent only if it doesn't exist
             child = next((child for child in parent['children'] if child['label'] == directories[1]), None)
             if child is None:
                 child = {
@@ -110,7 +111,6 @@ def build_apps_menu():
                 'action': 'fetchExec',
                 'path': app['relative_path'],
             })
-            menu_item['children'].append(parent)
         elif len(directories) == 1:
             parent = next((child for child in menu_item['children'] if child['label'] == directories[0]), None)
             if parent is None:
@@ -118,20 +118,21 @@ def build_apps_menu():
                     'label': directories[0],
                     'children': []
                 }
+                menu_item['children'].append(parent)  # Append parent only if it doesn't exist
             parent['children'].append({
                 'label': app['relative_path'].split('/')[-1],
                 'action': 'fetchExec',
                 'path': app['relative_path'],
             })
-            menu_item['children'].append(parent)
         else:
             menu_item['children'].append({
                 'label': app['relative_path'],
                 'action': 'fetchExec',
                 'path': app['relative_path'],
             })
-    
+
     return menu_item
+
 
 
 def build_main_menu():
@@ -187,6 +188,7 @@ def register_device(request_data):
     )
 
     device_config['firmware'] = get_firmware()
+    device_config['menu'] = build_main_menu()
 
     return device_config
     # TODO more complex login logic
