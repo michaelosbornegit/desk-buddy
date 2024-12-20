@@ -22,7 +22,7 @@ class Menu(Activity):
         # if we have no menu states, push on the current menu from device config
         if len(self.menu_states) == 0:
             # tack on back button to the top level menu
-            top_level_menu = self.functions.get_current_device_config()['menu']
+            top_level_menu = copy.deepcopy(self.functions.get_current_device_config()['menu'])
             top_level_menu.append({
                 'label': 'Go Back'
             })
@@ -87,7 +87,7 @@ class Menu(Activity):
             if len(self.menu_states) == 1:
                 # we are at the top level, go back to dashboard
                 self.hardware.display.clear()
-                self.functions.switch_activity('DASHBOARD')
+                await self.functions.switch_activity('DASHBOARD')
             if len(self.menu_states) > 1:
                 # we are in a submenu, go back to the previous menu
                 self.hardware.display.clear()
@@ -98,7 +98,7 @@ class Menu(Activity):
             if 'children' in current_menu_state['menu'][current_menu_state['selected_menu_item']]:
                 # we selected a submenu, push it on the stack
                 # tack on back button
-                menu = current_menu_state['menu'][current_menu_state['selected_menu_item']]['children']
+                menu = copy.deepcopy(current_menu_state['menu'][current_menu_state['selected_menu_item']]['children'])
                 menu.append({
                     'label': 'Go Back'
                 })
@@ -118,6 +118,9 @@ class Menu(Activity):
 
     async def on_mount(self):
         self.hardware.display.clear()
+        self.current_raw_display = []
+        self.menu_states = []
+        self.needs_render = True
 
     async def on_unmount(self):
-        self.menu_states = []
+        pass
