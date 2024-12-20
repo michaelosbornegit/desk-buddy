@@ -21,18 +21,22 @@ class Menu(Activity):
         
         # if we have no menu states, push on the current menu from device config
         if len(self.menu_states) == 0:
+            # tack on back button to the top level menu
+            top_level_menu = self.functions.get_current_device_config()['menu']
+            top_level_menu.append({
+                'label': 'Go Back'
+            })
+
             self.menu_states.append({
                 'selected_menu_item': 0,
-                'menu': self.functions.get_current_device_config()['menu'].append({
-                    'label': 'Go Back'
-                })
+                'menu': top_level_menu
             })
 
         self.current_raw_display = []
 
         # First, convert to raw menu items to display
         for index, item in enumerate(self.menu_states[-1]['menu']):
-            if index == self.selected_menu_item[0]:
+            if index == self.menu_states[-1]['selected_menu_item']:
                 # put inverted box to show its selected
                 self.current_raw_display.append({
                     'height': 16,
@@ -92,9 +96,14 @@ class Menu(Activity):
             # an actual menu item was selected, we need to do something
             if 'children' in current_menu_state['menu'][current_menu_state['selected_menu_item']]:
                 # we selected a submenu, push it on the stack
+                # tack on back button
+                menu = current_menu_state['menu'][current_menu_state['selected_menu_item']]['children']
+                menu.append({
+                    'label': 'Go Back'
+                })
                 self.menu_states.append({
                     'selected_menu_item': 0,
-                    'menu': current_menu_state['menu'][current_menu_state['selected_menu_item']]['children']
+                    'menu': menu
                 })
                 self.needs_render = True
             else:
@@ -110,4 +119,4 @@ class Menu(Activity):
         self.hardware.display.clear()
 
     async def on_unmount(self):
-        self.selected_menu_item = 0
+        self.menu_states = []

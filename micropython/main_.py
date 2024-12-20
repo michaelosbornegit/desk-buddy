@@ -4,6 +4,7 @@ import network
 import requests
 import esp32
 import sys
+import mip
 
 from display.enh_display import Enhanced_Display
 from secrets import ssid, ssid_password, device_secret, api_host, device_id
@@ -39,6 +40,9 @@ def main():
         try:
             # TODO Do the whole captive portal wifi thing
             connectToNetwork()
+
+            # Install necessary modules
+            mip.install('copy')
 
             device_config = register()
 
