@@ -86,10 +86,11 @@ class Menu(Activity):
             # go back
             if len(self.menu_states) == 1:
                 # we are at the top level, go back to dashboard
-                self.display.clear()
-                await self.functions.switch_activity('DASHBOARD')
+                self.hardware.display.clear()
+                self.functions.switch_activity('DASHBOARD')
             if len(self.menu_states) > 1:
                 # we are in a submenu, go back to the previous menu
+                self.hardware.display.clear()
                 self.menu_states.pop()
                 self.needs_render = True
         else:

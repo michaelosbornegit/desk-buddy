@@ -53,6 +53,7 @@ def main():
             executor.main()
             break
         except Exception as e:
+            DISPLAY.clear()
             DISPLAY.text("Desk Buddy", 0, 0, 1, 0, 128, 64, 0)
             DISPLAY.text("encountered an", 0, 16, 1, 0, 128, 64, 0)
             DISPLAY.text("irrecoverable error", 0, 32, 1, 0, 128, 64, 0)
@@ -62,5 +63,6 @@ def main():
             sys.print_exception(e)
             print('irrecoverable error, restarting...')
             time.sleep(5)
+        del sys.modules['executor']
 
 main()
