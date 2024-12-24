@@ -58,7 +58,7 @@ def main():
     while not BUTTON.value():
         button_held_time += 1
         time.sleep(0.01)
-        if button_held_time >= 100:
+        if button_held_time >= 500:
             DISPLAY.clear()
             DISPLAY.text("Factory reset", 0, 0, 1, 0, 128, 64, 1)
             DISPLAY.text("in progress...", 0, 16, 1, 0, 128, 64, 1)
