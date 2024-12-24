@@ -203,9 +203,9 @@ def get_config(device_id):
     device_config['menu'] = build_main_menu()
     return device_config
 
-def get_firmware_contents(file_name):   
+def get_firmware_contents(relative_path):   
     firmware = db.software_versions.find_one(
-        {'file_name': file_name},
+        {'relative_path': relative_path},
         {'_id': 0, 'contents': 1}
     )
 

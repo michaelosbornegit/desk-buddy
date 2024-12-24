@@ -9,14 +9,13 @@ def update_firmware():
         for file_name in files:
             file_path = os.path.join(root, file_name)
             
-            if file_name.endswith('.py') or file_name.endswith('.pf') or file_name.endswith('.html') or file and file_name != 'main.py' and file_name != 'main_.py':
+            if file_name.endswith('.py') or file_name.endswith('.pf') and file_name != 'main.py' and file_name != 'main_.py':
                 relative_path = os.path.relpath(file_path, folder_path)
-                file_name = file_name.split('.')[0]
                 
                 with open(file_path, 'rb') as file:
                     file_contents = file.read()
 
-                existing_entry = db.software_versions.find_one({'relative_path': relative_path, 'file_name': file_name})
+                existing_entry = db.software_versions.find_one({'relative_path': relative_path})
 
                 type = 'firmware'
                 if relative_path.startswith('apps/'):
@@ -31,7 +30,6 @@ def update_firmware():
                 else:
                     db.software_versions.insert_one({
                         'relative_path': relative_path,
-                        'file_name': file_name,
                         'contents': file_contents,
                         'type': type,
                         'version': 1
