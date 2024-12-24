@@ -72,10 +72,10 @@ DEFAULT_DEVICE_CONFIG = {
 
 def get_firmware():
     firmware = list(db.software_versions.find(
-        {'type': 'firmware'},
+        # TODO remove, this is for debugging, app should be on demand and firmware is critical and regularly updated
+        {'type': {'$in': ['firmware', 'app']}},
         {'_id': 0, 'file_name': 1, 'relative_path': 1, 'version': 1}
     ))
-    print('Firmware:', firmware)
     return firmware
 
 def build_apps_menu():

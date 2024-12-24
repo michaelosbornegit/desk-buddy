@@ -14,12 +14,28 @@
         "terminal.integrated.defaultProfile.linux": "zsh",
         "python.terminal.activateEnvInCurrentTerminal": false,
         "python.terminal.activateEnvironment": false,
-        "python.defaultInterpreterPath": "./server/.venv/bin/python"
-      
+        "python.defaultInterpreterPath": "./server/.venv/bin/python",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        // Include extra files (js) to show pretty colorize colors
+        "colorize.include": [
+          "**/*.js",
+          "**/*.ts",
+          "**/*.tsx",
+          "**/*.css",
+          "**/*.scss",
+          "**/*.sass",
+          "**/*.less",
+          "**/*.styl"
+        ]
       },
       "extensions": [
         "mkhl.direnv",
-        "ms-python.python"
+        "ms-python.python",
+        "eamodio.gitlens",
+        "orta.vscode-jest",
+        "kamikillerto.vscode-colorize",
+        "esbenp.prettier-vscode"
       ]
     }
   },

@@ -1,4 +1,4 @@
-from app.flappybuddy import FlappyBuddy
+from apps.flappybuddy import FlappyBuddy
 import network
 import requests
 import utime
@@ -24,6 +24,7 @@ activities = []
 current_activity = None
 button_long_press = False
 button_click = False
+button_holding_disabled = False
 
 def connectToNetwork():
     sta_if = network.WLAN(network.STA_IF)
@@ -95,8 +96,12 @@ def set_current_raw_display(raw_display):
     current_raw_display = raw_display
     last_raw_display = None
 
+def disable_button_holding():
+    global button_holding_disabled
+    button_holding_disabled = True
+
 async def switch_activity(activity_name):
-    global activities, current_activity
+    global activities, current_activity, button_holding_disabled
     new_activity = None
     for activity in activities:
         if activity.name == activity_name:
@@ -104,6 +109,7 @@ async def switch_activity(activity_name):
             break
     
     if new_activity:
+        button_holding_disabled = False
         if current_activity:
             await current_activity.on_unmount()
         await new_activity.on_mount()
@@ -128,7 +134,7 @@ async def main():
     current_device_config = register()
 
     hardware = Hardware(DISPLAY, LED, BUTTON)
-    functions = Functions(set_current_raw_display, switch_activity, get_current_device_config)
+    functions = Functions(set_current_raw_display, switch_activity, get_current_device_config, disable_button_holding)
     secrets = Secrets(device_secret, api_host, device_id)
 
     activities = [
@@ -137,15 +143,15 @@ async def main():
         FlappyBuddy('FLAPPYBUDDY', hardware, functions, secrets)
     ]
 
-    # await switch_activity('DASHBOARD')
+    await switch_activity('DASHBOARD')
     # debugging
-    await switch_activity('FLAPPYBUDDY')
+    # await switch_activity('FLAPPYBUDDY')
 
     button_held_time = 0
     last_fetch_time = utime.ticks_ms()
     while True:  
         # Check if button is being held, give button actions priority
-        if not BUTTON.value():
+        if not BUTTON.value() and button_holding_disabled == False:
             button_held_time += DEVICE_CYCLE_INTERVAL_MS
             DISPLAY.fill_rect(0, 62, round(128 * (button_held_time / BUTTON_LONG_PRESS_MS)), 2, 1)
             if button_held_time > 0:

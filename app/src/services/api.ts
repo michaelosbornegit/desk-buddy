@@ -1,8 +1,8 @@
-const endpoint = `${import.meta.env.VITE_API_HOST}` ?? '';
-const secret = `${import.meta.env.VITE_API_SECRET}` ?? '';
+const endpoint = `${import.meta.env.VITE_API_HOST}`;
+const secret = `${import.meta.env.VITE_API_SECRET}`;
 
 // TODO make this smarter to handle both json and not json
-const enrichedFetch = async (
+export const enrichedFetch = async (
   url: string,
   options = {} as RequestInit,
   throwOnError = true,
@@ -20,8 +20,4 @@ const enrichedFetch = async (
     return jsonResponse;
   }
   return response;
-};
-
-export const getDogDashboard = () => {
-  return enrichedFetch(`${endpoint}/dashboard/dog/two-screens-four-buttons`);
 };
