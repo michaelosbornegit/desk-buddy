@@ -3,8 +3,10 @@ import os
 import json
 
 from secrets import device_secret, api_host
+from utils import get_property_if_exists
 
 versions_file = 'versions.json'
+versions = {}
 
 try:
     with open(versions_file, 'r') as f:
@@ -40,7 +42,7 @@ def _check_for_update(firmware):
     currentDeviceVersion = 0
     update_available = False
 
-    currentDeviceVersion = versions[relative_path]
+    currentDeviceVersion = get_property_if_exists(versions, relative_path, 0)
     if firmware['version'] > currentDeviceVersion:
     # for debugging, always upload all files
     # if True:

@@ -13,9 +13,6 @@ from secrets import device_secret, api_host, device_id
 from firmware import firmware_update
 from hwconfig import DISPLAY, BUTTON
 
-NVS_NAMESPACE = 'storage'
-nvs = esp32.NVS(NVS_NAMESPACE)
-
 def connectToNetwork(ssid, ssid_password):
     DISPLAY.clear()
     DISPLAY.text("Connecting to", 0, 0, 1, 0, 128, 64, 1)
@@ -109,7 +106,7 @@ def main():
 
             # Import executor safely
             import executor
-            asyncio.run(main())
+            asyncio.run(executor.main())
             break
         except KeyError as e:
             print(f"KeyError: {e} - Check if 'executor.py' exists and is properly named.")

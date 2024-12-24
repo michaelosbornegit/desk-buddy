@@ -4,6 +4,7 @@ import struct
 import _thread
 from machine import Pin, I2C
 import machine
+import time
 
 from hwconfig import DISPLAY
 
@@ -112,18 +113,17 @@ def web_page():
 
 def start_web_server():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(('', 80))
     s.listen(5)
     print('Web server started on port 80')
     while True:
         conn, addr = s.accept()
         print('Connection from', addr)
-        request = conn.recv(1024).decode()
-        print('Request content:', request)
-
-        # Handle request path
-        if 'POST' in request:
-            try:
+        try:
+            request = conn.recv(1024).decode()
+            print('Request content:', request)
+            if 'POST' in request:
                 post_data = request.split('\r\n\r\n')[1]
                 post_data = url_decode(post_data)
                 params = dict(pair.split('=') for pair in post_data.split('&'))
@@ -132,17 +132,19 @@ def start_web_server():
                 with open('wifi_config.py', 'w') as f:
                     f.write(f"ssid = '{username}'\nssid_password = '{password}'\n")
                 response = """<h1>Thank you! You're all set!</h1>"""
+                conn.sendall('HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n'.encode() + response.encode())
+                conn.close()
+                time.sleep(2)  # Delay to ensure response is sent
                 machine.soft_reset()
-            except Exception as e:
-                print('Error parsing POST data:', e)
+            elif '/generate_204' in request:
+                conn.sendall('HTTP/1.1 204 No Content\r\n\r\n'.encode())
+            else:
                 response = web_page()
-        elif '/generate_204' in request:
-            response = ''
-        else:
-            response = web_page()
-
-        conn.sendall('HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n'.encode() + response.encode())
-        conn.close()
+                conn.sendall('HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n'.encode() + response.encode())
+        except Exception as e:
+            print('Error handling request:', e)
+        finally:
+            conn.close()
 
 def start_dns_server():
     ip = '192.168.4.1'
