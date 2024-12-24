@@ -9,9 +9,8 @@ import machine
 import os
 import asyncio
 
-from display.enh_display import Enhanced_Display
 from secrets import device_secret, api_host, device_id
-from osb_firmware import firmware_update
+from firmware import firmware_update
 from hwconfig import DISPLAY, BUTTON
 
 NVS_NAMESPACE = 'storage'
@@ -21,9 +20,9 @@ def connectToNetwork(ssid, ssid_password):
     DISPLAY.clear()
     DISPLAY.text("Connecting to", 0, 0, 1, 0, 128, 64, 1)
     DISPLAY.text(f"{ssid}", 0, 16, 1, 0, 128, 64, 1)
-    DISPLAY.text("((i))", 0, 32, 1, 0, 128, 64, 1)
-    DISPLAY.text("|", 0, 40, 1, 0, 128, 64, 1)
-    DISPLAY.text("[o_o]", 0, 48, 1, 0, 128, 64, 1)
+    DISPLAY.text("((i))", 0, 40, 1, 0, 128, 64, 1)
+    DISPLAY.text("|", 0, 48, 1, 0, 128, 64, 1)
+    DISPLAY.text("[o_o]", 0, 56, 1, 0, 128, 64, 1)
     DISPLAY.show()
     sta_if = network.WLAN(network.STA_IF)
     if not sta_if.isconnected():
@@ -47,33 +46,34 @@ def register():
 
 def main():
     button_held_time = 0
-    while not BUTTON.value():
+    if not BUTTON.value():
         DISPLAY.clear()
-        DISPLAY.text("Keep holding to", 0, 0, 1, 0, 128, 64, 1)
-        DISPLAY.text("factory reset me...", 0, 16, 1, 0, 128, 64, 1)
-        DISPLAY.text("i", 0, 32, 1, 0, 128, 64, 1)
-        DISPLAY.text("|", 0, 40, 1, 0, 128, 64, 1)
-        DISPLAY.text("[o_o]", 0, 48, 1, 0, 128, 64, 1)
+        DISPLAY.text("Keep holding", 0, 0, 1, 0, 128, 64, 1)
+        DISPLAY.text('to factory', 0, 8, 1, 0, 128, 64, 1)
+        DISPLAY.text("reset me...", 0, 16, 1, 0, 128, 64, 1)
+        DISPLAY.text("i", 0, 40, 1, 0, 128, 64, 1)
+        DISPLAY.text("|", 0, 48, 1, 0, 128, 64, 1)
+        DISPLAY.text("[o_o]", 0, 56, 1, 0, 128, 64, 1)
         DISPLAY.show()
+    while not BUTTON.value():
         button_held_time += 1
         time.sleep(0.01)
-        if button_held_time == 100:
+        if button_held_time >= 100:
             DISPLAY.clear()
             DISPLAY.text("Factory reset", 0, 0, 1, 0, 128, 64, 1)
             DISPLAY.text("in progress...", 0, 16, 1, 0, 128, 64, 1)
-            DISPLAY.text("i", 0, 32, 1, 0, 128, 64, 1)
-            DISPLAY.text("|", 0, 40, 1, 0, 128, 64, 1)
-            DISPLAY.text("[x_x]", 0, 48, 1, 0, 128, 64, 1)
+            DISPLAY.text("i", 0, 40, 1, 0, 128, 64, 1)
+            DISPLAY.text("|", 0, 48, 1, 0, 128, 64, 1)
+            DISPLAY.text("[x_x]", 0, 56, 1, 0, 128, 64, 1)
             DISPLAY.show()
-            time.sleep(2)
-            p = esp32.Partition.find(esp32.Partition.TYPE_DATA, label='nvs')[0]
-
-            # p.info()[3] is partition size
-            for x in range(int(p.info()[3] / 4096)):
-                p.writeblocks(x, bytearray(4096))
-            
+            time.sleep(2)    
             try:
                 os.remove('wifi_config.py')
+            except OSError:
+                pass
+
+            try:
+                os.remove('versions.json')
             except OSError:
                 pass
 
@@ -81,9 +81,9 @@ def main():
     DISPLAY.clear()
     DISPLAY.text("Desk Buddy is", 0, 0, 1, 0, 128, 64, 1)
     DISPLAY.text("Starting up...", 0, 16, 1, 0, 128, 64, 1)
-    DISPLAY.text("i", 0, 32, 1, 0, 128, 64, 1)
-    DISPLAY.text("|", 0, 40, 1, 0, 128, 64, 1)
-    DISPLAY.text("[o_o]", 0, 48, 1, 0, 128, 64, 1)
+    DISPLAY.text("i", 0, 40, 1, 0, 128, 64, 1)
+    DISPLAY.text("|", 0, 48, 1, 0, 128, 64, 1)
+    DISPLAY.text("[o_o]", 0, 56, 1, 0, 128, 64, 1)
     DISPLAY.show()
     time.sleep(3)
     while True:
@@ -92,12 +92,12 @@ def main():
                 import wifi_config
                 ssid = wifi_config.ssid
                 ssid_password = wifi_config.ssid_password
+                connectToNetwork(ssid, ssid_password)
             except ImportError:
                 import captive_portal_setup
                 captive_portal_setup.main()
                 break
             
-            connectToNetwork()
 
             # Install necessary modules
             mip.install('copy')
@@ -119,13 +119,14 @@ def main():
             DISPLAY.text("encountered an", 0, 8, 1, 0, 128, 64, 1)
             DISPLAY.text("irrecoverable", 0, 16, 1, 0, 128, 64, 1)
             DISPLAY.text("error", 0, 24, 1, 0, 128, 64, 1)
-            DISPLAY.text("[x.x]", 0, 40, 1, 0, 128, 64, 1)
-            DISPLAY.text("Restarting...", 0, 56, 1, 0, 128, 64, 1)
+            DISPLAY.text("Restarting...", 0, 32, 1, 0, 128, 64, 1)
+            DISPLAY.text("!", 0, 40, 1, 0, 128, 64, 1)
+            DISPLAY.text("|", 0, 48, 1, 0, 128, 64, 1)
+            DISPLAY.text("[x.x]", 0, 56, 1, 0, 128, 64, 1)
             DISPLAY.show()
             sys.print_exception(e)
             print('irrecoverable error, restarting...')
-            machine.reset()
+            machine.soft_reset()
             time.sleep(5)
-
 
 main()

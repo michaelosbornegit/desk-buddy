@@ -1,11 +1,18 @@
-import esp32
 import requests
 import os
+import json
 
 from secrets import device_secret, api_host
 
-NVS_NAMESPACE = 'storage'
-nvs = esp32.NVS(NVS_NAMESPACE)
+versions_file = 'versions.json'
+
+try:
+    with open(versions_file, 'r') as f:
+        versions = json.load(f)
+except OSError:
+    versions = {}
+    with open(versions_file, 'w') as f:
+        json.dump(versions, f)
 
 def makedirs(path):
     """Recursively create directories, handling paths without os.path."""
@@ -29,16 +36,14 @@ def makedirs(path):
         current_path += "/"
 
 def _check_for_update(firmware):
-    file_name = firmware['file_name']
+    relative_path = firmware['relative_path']
     currentDeviceVersion = 0
     update_available = False
-    try:
-        currentDeviceVersion = nvs.get_i32(file_name)
-        if firmware['version'] > currentDeviceVersion:
-        # for debugging, always upload all files
-        # if True:
-            update_available = True
-    except OSError: # key doesn't exist
+
+    currentDeviceVersion = versions[relative_path]
+    if firmware['version'] > currentDeviceVersion:
+    # for debugging, always upload all files
+    # if True:
         update_available = True
     
     return update_available
@@ -51,15 +56,17 @@ def firmware_check(device_config):
             return True
 
 def firmware_update(device_config):
-    nvs_modified = False
+    versions_modified = False
 
     for firmware in device_config['firmware']:
         update_available = _check_for_update(firmware)
         # don't allow writing important micropython firmware files
-        if firmware['file_name'] in ['boot.py', 'main.py', 'firmware.py', 'secrets.py']:
-            raise Exception(f'Firmware updater tried something forbidden: overwriting {firmware["file_name"]}')
+        if firmware['relative_path'] in ['boot.py', 'main.py', 'secrets.py']:
+            raise Exception(f'Firmware updater tried something forbidden: overwriting {firmware["relative_path"]}')
         if update_available:
-            firmware_response = requests.get(f'{api_host}/devices/firmware/{firmware["file_name"]}', headers={'Authorization': device_secret})
+            # quote periods
+            encoded_relative_path = firmware['relative_path'].replace('.', '%2E')
+            firmware_response = requests.get(f'{api_host}/devices/firmware/{encoded_relative_path}', headers={'Authorization': device_secret})
             
             # Ensure directories exist before opening the file
             makedirs(firmware['relative_path'])
@@ -68,8 +75,9 @@ def firmware_update(device_config):
             with open(firmware['relative_path'], 'wb') as f:
                 print(f'Writing firmware to {firmware["relative_path"]}')
                 f.write(firmware_response.content)
-                nvs.set_i32(firmware['file_name'], firmware['version'])
-                nvs_modified = True
+                versions[firmware['relative_path']] = firmware['version']
+                versions_modified = True
     
-    if nvs_modified:
-        nvs.commit()
+    if versions_modified:
+        with open(versions_file, 'w') as f:
+            json.dump(versions, f)
