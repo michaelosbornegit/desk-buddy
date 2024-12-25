@@ -30,7 +30,6 @@ const Login = (): JSX.Element => {
 
   const onSubmit = async (values: UserLogin) => {
     await register(values.pairingCode);
-    navigate('/home');
   };
 
   return (
@@ -77,7 +76,6 @@ const Login = (): JSX.Element => {
               <Button type="submit" variant="contained" fullWidth>
                 Login
               </Button>
-              <pre>{JSON.stringify(values, null, 2)}</pre>
             </form>
           );
         }}

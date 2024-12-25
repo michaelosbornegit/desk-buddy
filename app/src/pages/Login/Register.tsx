@@ -76,7 +76,6 @@ const Register = (): JSX.Element => {
               <Button type="submit" variant="contained" fullWidth>
                 Register
               </Button>
-              <pre>{JSON.stringify(values, null, 2)}</pre>
             </form>
           );
         }}

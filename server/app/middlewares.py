@@ -12,7 +12,7 @@ def app_auth():
         def __require_auth(*args, **kwargs):
             if request.headers.get("Authorization") != Config.APP_SECRET:
                 abort(401, description="Invalid authorization header")
-            if "pairingCode" not in session:
+            if "pairingCode" not in session or "displayName" not in session:
                 abort(401, description="Need to be authorized for route")
             result = f(*args, **kwargs)
             return result

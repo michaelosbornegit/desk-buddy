@@ -10,6 +10,7 @@ from app.utils import get_property_if_exists
 def send_message():
     request_data = request.get_json()
     message_from = session.get("displayName")
+    print(session)
     message_to = get_property_if_exists(request_data, "to")
     message = get_property_if_exists(request_data, "message")
     return services.send_message(message_from, message_to, message)
@@ -22,3 +23,9 @@ def get_read_messages():
     limit = int(request.args.get("limit", 5))
     offset = int(request.args.get("offset", 0))
     return services.get_read_messages(display_name, limit, offset)
+
+
+@bp.route("get-recipients", methods=["GET"])
+@app_auth()
+def get_recipients():
+    return services.get_recipients()

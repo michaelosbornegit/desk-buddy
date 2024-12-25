@@ -1,3 +1,4 @@
+from utils import get_los_angeles_time
 import utime
 import time
 import asyncio
@@ -46,14 +47,18 @@ class Dashboard(Activity):
             if self.current_dashboard_data:
                 filled_in_dashbaord = copy.deepcopy(self.current_dashboard_data)
                 # Replace content with what device can provide
-                current_time = time.localtime()
+                current_time = get_los_angeles_time()
                 for row in filled_in_dashbaord:
                     for widget in row["children"]:
                         if "__CURRENT_DEVICE_TIME__" in widget["content"]:
+                            hour = current_time[3]
+                            am_pm = "AM" if hour < 12 else "PM"
+                            hour = hour % 12
+                            hour = 12 if hour == 0 else hour
                             widget["content"] = widget["content"].replace(
                                 "__CURRENT_DEVICE_TIME__",
-                                "{:02d}:{:02d}:{:02d}".format(
-                                    current_time[3], current_time[4], current_time[5]
+                                "{:01d}:{:02d}:{:02d} {}".format(
+                                    hour, current_time[4], current_time[5], am_pm
                                 ),
                             )
                 self.functions.set_current_raw_display(filled_in_dashbaord)
@@ -64,7 +69,7 @@ class Dashboard(Activity):
 
     async def button_long_click(self):
         await self.current_task
-        await self.functions.switch_activity("MENU")
+        await self.functions.switch_activity("Menu")
 
     async def on_mount(self):
         self.hardware.display.clear()

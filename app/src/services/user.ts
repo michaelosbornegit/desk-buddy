@@ -18,8 +18,8 @@ export const userRegister = (pairingCode: string, displayName?: string, forceAss
         forceAssociate,
       }),
     },
-    true,
-    true
+    false,
+    false
   );
 };
 

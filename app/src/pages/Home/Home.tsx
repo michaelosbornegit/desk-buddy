@@ -18,6 +18,8 @@ const Home = (): JSX.Element => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
+  console.log(currentUser);
+
   return (
     <Container maxWidth="sm">
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '32px' }}>

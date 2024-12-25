@@ -1,7 +1,7 @@
 export type User = {
   pairingCode: string;
   displayName: string;
-  admin: boolean;
+  admin?: boolean;
 };
 
 export type UserRegister = {

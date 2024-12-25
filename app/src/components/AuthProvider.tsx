@@ -53,11 +53,17 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 
   const register = async (pairingCode: string, displayName?: string, forceAssociate = false) => {
     try {
-      const user = await userRegister(pairingCode, displayName, forceAssociate);
+      const response = await userRegister(pairingCode, displayName, forceAssociate);
 
-      setCurrentUser(user);
+      const user = await response.json();
+
+      if (response.status === 200) {
+        setCurrentUser(user);
+      } else {
+        enqueueSnackbar(`Error logging in, have you registered?`, { variant: 'error' });
+      }
     } catch (error) {
-      enqueueSnackbar('Error registering user', { variant: 'error' });
+      enqueueSnackbar(`Error logging in, have you registered?`, { variant: 'error' });
     }
   };
 

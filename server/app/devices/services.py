@@ -1,5 +1,4 @@
-from os import abort
-from flask import session
+from flask import session, abort
 
 from app.db import db
 from app.errors import unauthorized
@@ -50,7 +49,7 @@ def build_apps_menu():
             child["children"].append(
                 {
                     "label": app["relative_path"].split("/")[-1],
-                    "action": "fetchExec",
+                    "action": "exec",
                     "path": app["relative_path"],
                 }
             )
@@ -62,7 +61,7 @@ def build_apps_menu():
             parent["children"].append(
                 {
                     "label": app["relative_path"].split("/")[-1],
-                    "action": "fetchExec",
+                    "action": "exec",
                     "path": app["relative_path"],
                 }
             )
@@ -70,7 +69,7 @@ def build_apps_menu():
             menu_item["children"].append(
                 {
                     "label": app["relative_path"],
-                    "action": "fetchExec",
+                    "action": "exec",
                     "path": app["relative_path"],
                 }
             )
@@ -78,12 +77,17 @@ def build_apps_menu():
     return menu_item
 
 
-def build_main_menu():
+def notifications_menu_item(device_config):
+    return {
+        "label": f"{len(device_config['notifications'])} Notifications",
+        "action": "exec",
+        "path": "notifications.py",
+    }
+
+
+def build_main_menu(device_config):
     menu = [
-        {
-            # TODO make notification firmware
-            "label": "0 Notifications",
-        },
+        notifications_menu_item(device_config),
         build_apps_menu(),
     ]
 
@@ -103,9 +107,6 @@ def login(pairing_code):
     else:
         abort(500, "Device config not found, is the account registered?")
 
-    # device_config["firmware"] = get_firmware()
-    # device_config["menu"] = build_main_menu()
-
     return {
         "pairingCode": pairing_code,
         "displayName": device["displayName"],
@@ -122,9 +123,13 @@ def register(pairing_code, display_name, force_associate):
     if existing_device is None:
         return abort(404, "Device not found")
 
+    if display_name is None and get_property_if_exists(existing_device, "displayName") is None:
+        return abort(400, "Display name is required, have you registered this device before?")
+
     should_register_to_device = False
 
     if display_name is not None:
+        # must figure out what to do with given displayName
         if get_property_if_exists(existing_device, "displayName") is None:
             # Device has never been registered, register it
             should_register_to_device = True
@@ -149,9 +154,8 @@ def register(pairing_code, display_name, force_associate):
                 },
             )
 
-    # Create session
-    session["pairingCode"] = pairing_code
-    session["displayName"] = display_name
+    # reload what we have in the database
+    existing_device = db.devices.find_one({"pairingCode": pairing_code})
 
     device_config = {}
 
@@ -168,8 +172,9 @@ def register(pairing_code, display_name, force_associate):
             },
         )
 
-    # device_config["firmware"] = get_firmware()
-    # device_config["menu"] = build_main_menu()
+    # Create session
+    session["pairingCode"] = existing_device["pairingCode"]
+    session["displayName"] = existing_device["displayName"]
 
     return {
         "pairingCode": existing_device["pairingCode"],
@@ -177,11 +182,12 @@ def register(pairing_code, display_name, force_associate):
     }
 
 
-def build_notifications():
+def build_notifications(device_config):
     notifications = []
 
     # check messages
-    messages = message_services.get_unread_messages(session.get("displayName"))
+    messages = message_services.get_unread_messages(device_config["displayName"])
+    print(messages)
 
     for message in messages:
         notifications.append(
@@ -197,10 +203,11 @@ def build_notifications():
 def get_config(device_id):
     device = db.devices.find_one({"deviceId": device_id})
     device_config = device["deviceConfig"]
-    device_config["firmware"] = get_firmware()
-    device_config["menu"] = build_main_menu()
-    device_config["notifications"] = build_notifications()
+    # put displayName on deviceConfig for display purposes on device, but otherwise keep it separate
     device_config["displayName"] = device["displayName"]
+    device_config["firmware"] = get_firmware()
+    device_config["notifications"] = build_notifications(device_config)
+    device_config["menu"] = build_main_menu(device_config)
     return device_config
 
 
