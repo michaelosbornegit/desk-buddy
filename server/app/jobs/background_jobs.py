@@ -9,8 +9,10 @@ def update_firmware():
         for file_name in files:
             file_path = os.path.join(root, file_name)
 
-            if file_name.endswith(".py") or (file_name.endswith(".pf") and file_name not in ("main.py", "main_.py")):
+            if file_name not in ("main.py", "main_.py") and (file_name.endswith((".py", ".pf"))):
                 relative_path = os.path.relpath(file_path, folder_path)
+
+                file_contents = None
 
                 with open(file_path, "rb") as file:
                     file_contents = file.read()

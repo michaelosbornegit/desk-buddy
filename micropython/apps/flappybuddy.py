@@ -5,18 +5,19 @@ import copy
 
 from activity import Activity
 
+
 class FlappyBuddy(Activity):
     def __init__(self, name, hardware, functions, secrets):
         super().__init__(name, hardware, functions, secrets)
-        self.refresh_rate = 1000/120 # 120fps
+        self.refresh_rate = 1000 / 120  # 120fps
         self.last_render = utime.ticks_ms()
         self.user_y = 50
         self.user_y_speed = 0
-    
+
     async def render(self):
         if utime.ticks_diff(utime.ticks_ms(), self.last_render) < self.refresh_rate:
             return
-        
+
         display = self.hardware.display
 
         # Game loop
@@ -32,13 +33,13 @@ class FlappyBuddy(Activity):
 
         display.rect(31, round(self.user_y), 1, 1, 1)
         pass
-    
+
     async def button_click(self):
         self.user_y_speed = -2
         # went off the screen
         if self.user_y < 0:
             self.user_y = 0
-        elif self.user_y == 63: 
+        elif self.user_y == 63:
             # unstick from bottom
             self.user_y = 62
         pass
