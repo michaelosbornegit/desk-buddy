@@ -26,8 +26,23 @@ def connectToNetwork(ssid, ssid_password):
         print(f'Connecting to network...')
         sta_if.active(True)
         sta_if.connect(ssid, ssid_password)
+        timeout = 10  # seconds
+        start_time = time.time()
         while not sta_if.isconnected():
-            pass
+            if time.time() - start_time > timeout:
+                DISPLAY.clear()
+                DISPLAY.text("Failed to connect", 0, 0, 1, 0, 128, 64, 1)
+                DISPLAY.text("to network", 0, 8, 1, 0, 128, 64, 1)
+                DISPLAY.text("Check settings", 0, 16, 1, 0, 128, 64, 1)
+                DISPLAY.text("and try again", 0, 24, 1, 0, 128, 64, 1)
+                DISPLAY.show()
+                print('Failed to connect to network')
+                time.sleep(10)
+                try:
+                    os.remove('wifi_config.py')
+                except OSError:
+                    pass
+                machine.reset()
     print('Network config:', sta_if.ipconfig('addr4'))
 
 def register():
@@ -138,7 +153,7 @@ def main():
             DISPLAY.show()
             sys.print_exception(e)
             print('irrecoverable error, restarting...')
-            machine.soft_reset()
             time.sleep(5)
+            machine.reset()
 
 main()

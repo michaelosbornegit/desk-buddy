@@ -178,7 +178,7 @@ def start_web_server():
                 conn.sendall('HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n'.encode() + response.encode())
                 conn.close()
                 time.sleep(2)  # Delay to ensure response is sent
-                machine.soft_reset()
+                machine.reset()
             elif '/generate_204' in request:
                 conn.sendall('HTTP/1.1 204 No Content\r\n\r\n'.encode())
             else:

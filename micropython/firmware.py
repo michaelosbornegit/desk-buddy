@@ -38,12 +38,13 @@ def makedirs(path):
         current_path += "/"
 
 def _check_for_update(firmware):
+    global versions
     relative_path = firmware['relative_path']
-    currentDeviceVersion = 0
+    current_device_version = 0
     update_available = False
 
-    currentDeviceVersion = get_property_if_exists(versions, relative_path, 0)
-    if firmware['version'] > currentDeviceVersion:
+    current_device_version = get_property_if_exists(versions, relative_path, 0)
+    if firmware['version'] > current_device_version:
     # for debugging, always upload all files
     # if True:
         update_available = True
@@ -51,13 +52,18 @@ def _check_for_update(firmware):
     return update_available
 
 def firmware_check(device_config):
+    global versions
+    with open(versions_file, 'r') as f:
+        versions = json.load(f)
     # Check if we need to update firmware
     for firmware in device_config['firmware']:
-        update_available = _check_for_update(firmware)
-        if update_available:
-            return True
+        return _check_for_update(firmware)
+
 
 def firmware_update(device_config):
+    global versions
+    with open(versions_file, 'r') as f:
+        versions = json.load(f)
     versions_modified = False
 
     for firmware in device_config['firmware']:
@@ -68,6 +74,7 @@ def firmware_update(device_config):
         if update_available:
             # quote periods
             encoded_relative_path = firmware['relative_path'].replace('.', '%2E')
+            encoded_relative_path = encoded_relative_path.replace('/', '%2F')
             firmware_response = requests.get(f'{api_host}/devices/firmware/{encoded_relative_path}', headers={'Authorization': device_secret})
             
             # Ensure directories exist before opening the file
@@ -76,6 +83,7 @@ def firmware_update(device_config):
             # Write the file
             with open(firmware['relative_path'], 'wb') as f:
                 print(f'Writing firmware to {firmware["relative_path"]}')
+                print(firmware_response.content)
                 f.write(firmware_response.content)
                 versions[firmware['relative_path']] = firmware['version']
                 versions_modified = True

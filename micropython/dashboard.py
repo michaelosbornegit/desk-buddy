@@ -37,6 +37,7 @@ class Dashboard(Activity):
         await self.functions.switch_activity('MENU')
 
     async def on_mount(self):
+        self.hardware.display.clear()
         if self.current_task:
             await self.current_task
             self.current_task.cancel()
