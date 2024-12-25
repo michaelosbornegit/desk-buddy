@@ -1,14 +1,15 @@
 import styled from '@emotion/styled';
 import { CircularProgress } from '@mui/material';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
+import { userCheckLogin, userLogout, userRegister } from '../services/user';
 import { User } from '../types/users';
-import { userCheckLogin, userLogout, userRegister } from 'services/user';
+import { useSnackbar } from 'notistack';
 
 interface AuthContextType {
   currentUser: User | null;
-  register: (displayName: string, deviceCode: string) => void;
+  register: (pairingCode: string, displayName?: string, forceAssociate?: boolean) => Promise<void>;
   logout: () => void;
   initialized: boolean;
 }
@@ -31,6 +32,7 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -49,13 +51,13 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
     checkLogin();
   }, []);
 
-  const register = async (email: string, password: string) => {
-    const response = await userRegister(email, password);
-    if (response.status === 200) {
-      const user = await response.json();
+  const register = async (pairingCode: string, displayName?: string, forceAssociate = false) => {
+    try {
+      const user = await userRegister(pairingCode, displayName, forceAssociate);
+
       setCurrentUser(user);
-    } else {
-      throw new Error('Error logging in');
+    } catch (error) {
+      enqueueSnackbar('Error registering user', { variant: 'error' });
     }
   };
 
@@ -111,7 +113,7 @@ export const RequireAuth: React.FC<Props> = ({ children }) => {
   }
 
   if (initialized && !currentUser) {
-    return <Navigate to="/register" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;

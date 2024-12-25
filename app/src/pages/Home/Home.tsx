@@ -1,8 +1,10 @@
 import styled from '@emotion/styled';
-import { Box, Button, Container, TextField, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { Mail, Message, Settings, Visibility } from '@mui/icons-material';
+import { Alert, Button, Container, Typography } from '@mui/material';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { getDogDashboard } from '../../services/api';
+import { useAuth } from '../../components/AuthProvider';
 
 const PageContainer = styled.div({
   display: 'flex',
@@ -13,82 +15,66 @@ const PageContainer = styled.div({
 });
 
 const Home = (): JSX.Element => {
-  const [displayOneMessage, setDisplayOneMessage] = useState<string>('');
-  const [displayTwoMessage, setDisplayTwoMessage] = useState<string>('');
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const dashboard = await getDogDashboard();
-
-      setDisplayOneMessage(dashboard.screen_one.text);
-      setDisplayTwoMessage(dashboard.screen_two.text);
-    };
-    fetchData();
-  });
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
 
   return (
-    <Container maxWidth="lg">
-      <PageContainer>
-        <Box sx={{ height: '10vh' }} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '50px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Button variant="contained">button 1</Button>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-              }}
-            >
-              <Typography variant="caption">Display 1</Typography>
-              <TextField
-                multiline
-                rows={5}
-                value={displayOneMessage}
-                disabled
-                // Make the display behave like raspberry pi OLEDs, they have 16 character width and overflow by clipping
-                inputProps={{
-                  style: {
-                    fontFamily: 'monospace',
-                    width: '17ch',
-                    whiteSpace: 'pre',
-                    overflowX: 'clip',
-                  },
-                }}
-              />
-            </div>
-            <Button variant="contained">button 2</Button>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Button variant="contained">button 3</Button>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-              }}
-            >
-              <Typography variant="caption">Display 2</Typography>
-              <TextField
-                multiline
-                rows={5}
-                value={displayTwoMessage}
-                disabled
-                // Make the display behave like raspberry pi OLEDs, they have 16 character width and overflow by clipping
-                inputProps={{
-                  style: {
-                    fontFamily: 'monospace',
-                    width: '17ch',
-                    whiteSpace: 'pre',
-                    overflowX: 'clip',
-                  },
-                }}
-              />
-            </div>
-            <Button variant="contained">button 4</Button>
-          </div>
-        </div>
-      </PageContainer>
+    <Container maxWidth="sm">
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '32px' }}>
+        <Typography>
+          Welcome <b>{currentUser?.displayName}</b>
+        </Typography>
+        <Typography textAlign={'right'}>
+          Desk Buddy <b>{currentUser?.pairingCode}</b>
+        </Typography>
+      </div>
+      <Typography sx={{ marginBottom: '32px' }}>What would you like to do?</Typography>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}></div>
+      <Button
+        variant="contained"
+        size="large"
+        onClick={() => {
+          navigate('/send-message');
+        }}
+        fullWidth
+        sx={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between' }}
+        color="secondary"
+        endIcon={<Mail />}
+      >
+        send a message
+      </Button>
+      <Button
+        variant="contained"
+        size="large"
+        onClick={() => {
+          navigate('/message-history');
+        }}
+        fullWidth
+        sx={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between' }}
+        color="secondary"
+        endIcon={<Visibility />}
+      >
+        view read messages
+      </Button>
+      <Button
+        variant="contained"
+        size="large"
+        onClick={() => {
+          navigate('/configure-buddy');
+        }}
+        fullWidth
+        sx={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between' }}
+        color="secondary"
+        endIcon={<Settings />}
+      >
+        customize buddy
+      </Button>
+      <Alert severity="info" sx={{ marginBottom: '32px' }}>
+        Buddy messed up?
+        <br />
+        <br />
+        Plug it in while holding the button to factory reset it.
+      </Alert>
     </Container>
   );
 };

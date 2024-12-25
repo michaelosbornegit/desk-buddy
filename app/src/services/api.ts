@@ -10,6 +10,7 @@ export const enrichedFetch = async (
 ) => {
   const response = await fetch(url, {
     ...options,
+    credentials: 'include',
     headers: { ...options.headers, Authorization: secret },
   });
   if (response.status === 204) return response;

@@ -3,7 +3,7 @@ name = "server"
 version = "0.1.0"
 description = "Desk Buddy Server"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "eventlet>=0.38.0",
     "flask-cors>=5.0.0",
@@ -16,4 +16,11 @@ dependencies = [
     "pymongo>=4.10.1",
     "flask-bcrypt>=1.0.1",
     "flask-apscheduler>=1.13.1",
+    "flask-session[mongodb]>=0.8.0",
 ]
+
+[tool.ruff.lint]
+select = ["ALL"]
+
+[tool.ruff]
+line-length = 120

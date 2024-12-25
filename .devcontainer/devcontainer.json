@@ -16,7 +16,9 @@
         "python.terminal.activateEnvironment": false,
         "python.defaultInterpreterPath": "./server/.venv/bin/python",
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        // Disable default formatters so prettier takes over
+        "typescript.format.enable": false,
+        "javascript.format.enable": false,
         // Include extra files (js) to show pretty colorize colors
         "colorize.include": [
           "**/*.js",
@@ -27,7 +29,10 @@
           "**/*.sass",
           "**/*.less",
           "**/*.styl"
-        ]
+        ],
+        // For correct module import resolution
+        "javascript.preferences.importModuleSpecifier": "relative",
+        "typescript.preferences.importModuleSpecifier": "relative"
       },
       "extensions": [
         "mkhl.direnv",
@@ -35,18 +40,14 @@
         "eamodio.gitlens",
         "orta.vscode-jest",
         "kamikillerto.vscode-colorize",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "charliermarsh.ruff",
+        "dbaeumer.vscode-eslint"
       ]
     }
   },
-  "appPort": [
-    "4352:3000",
-    "4353:3001"
-  ],
-  "runArgs": [
-    "--name",
-    "desk-buddy_devcontainer"
-  ],
+  "appPort": ["4352:3000", "4353:3001"],
+  "runArgs": ["--name", "desk-buddy_devcontainer"],
   "postCreateCommand": "direnv allow . && nix develop --command bash /tmp/post-install-setup.sh",
   "remoteUser": "vscode"
 }

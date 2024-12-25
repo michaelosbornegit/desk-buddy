@@ -1,27 +1,28 @@
 import { enrichedFetch } from './api';
 
 export const userCheckLogin = () => {
-  return enrichedFetch(`${import.meta.env.VITE_API_HOST}/users/login`);
+  return enrichedFetch(`${import.meta.env.VITE_API_HOST}/devices/login`, {}, false, false);
 };
 
-export const userRegister = (displayName: string, deviceCode: string) => {
+export const userRegister = (pairingCode: string, displayName?: string, forceAssociate = true) => {
   return enrichedFetch(
-    `${import.meta.env.VITE_API_HOST}/users/register`,
+    `${import.meta.env.VITE_API_HOST}/devices/login`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        pairingCode,
         displayName,
-        deviceCode,
+        forceAssociate,
       }),
     },
-    false,
-    false
+    true,
+    true
   );
 };
 
 export const userLogout = () => {
-  return enrichedFetch(`${import.meta.env.VITE_API_HOST}/users/logout`, undefined, false, false);
+  return enrichedFetch(`${import.meta.env.VITE_API_HOST}/devices/logout`, undefined, false, false);
 };
