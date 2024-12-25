@@ -1,4 +1,3 @@
-from micropython.executor import switch_activity
 import utime
 import asyncio
 import requests
@@ -93,7 +92,7 @@ class menu(Activity):
             if len(self.menu_states) == 1:
                 # we are at the top level, go back to dashboard
                 self.hardware.display.clear()
-                await self.functions.switch_activity("DASHBOARD")
+                await self.functions.switch_activity("dashboard")
             if len(self.menu_states) > 1:
                 # we are in a submenu, go back to the previous menu
                 self.hardware.display.clear()
@@ -125,6 +124,7 @@ class menu(Activity):
                         current_menu_state["selected_menu_item"]
                     ]["path"]
                     await self.functions.load_new_activity(path)
+
                     await self.functions.switch_activity(
                         path.split("/")[-1].split(".")[0]
                     )

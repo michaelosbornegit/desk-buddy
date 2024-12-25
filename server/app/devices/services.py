@@ -48,7 +48,7 @@ def build_apps_menu():
                 parent["children"].append(child)
             child["children"].append(
                 {
-                    "label": app["relative_path"].split("/")[-1],
+                    "label": app["relative_path"].split("/")[-1].split(".")[0],
                     "action": "activity",
                     "path": app["relative_path"],
                 }
@@ -60,7 +60,7 @@ def build_apps_menu():
                 menu_item["children"].append(parent)  # Append parent only if it doesn't exist
             parent["children"].append(
                 {
-                    "label": app["relative_path"].split("/")[-1],
+                    "label": app["relative_path"].split("/")[-1].split(".")[0],
                     "action": "activity",
                     "path": app["relative_path"],
                 }
@@ -68,7 +68,7 @@ def build_apps_menu():
         else:
             menu_item["children"].append(
                 {
-                    "label": app["relative_path"],
+                    "label": app["relative_path"].split("/")[-1].split(".")[0],
                     "action": "activity",
                     "path": app["relative_path"],
                 }
@@ -187,7 +187,6 @@ def build_notifications(device_config):
 
     # check messages
     messages = message_services.get_unread_messages(device_config["displayName"])
-    print(messages)
 
     for message in messages:
         notifications.append(

@@ -69,7 +69,7 @@ class dashboard(Activity):
 
     async def button_long_click(self):
         await self.current_task
-        await self.functions.switch_activity("Menu")
+        await self.functions.switch_activity("menu")
 
     async def on_mount(self):
         self.hardware.display.clear()

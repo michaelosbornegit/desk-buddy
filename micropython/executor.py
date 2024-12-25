@@ -172,9 +172,9 @@ async def load_new_activity(path):
     fileName = path.split("/")[-1]
     activityName = fileName.split(".")[0]
 
-    module = __import__(path)
+    module = __import__(path.split(".")[0])
     activity = getattr(module, activityName)
-    activities.append(activity(functions, hardware, secrets))
+    activities.append(activity(activityName, functions, hardware, secrets))
 
 
 def register():
@@ -224,7 +224,7 @@ async def main():
         flappybuddy("flappybuddy", hardware, functions, secrets),
     ]
 
-    await switch_activity("Dashboard")
+    await switch_activity("dashboard")
     # debugging
     # await switch_activity('flappybuddy')
 
@@ -258,7 +258,7 @@ async def main():
 
             # Now we can do anything unrelated to buttons
             # Refresh config every fetchInterval
-            if current_activity.name == "Dashboard":
+            if current_activity.name == "dashboard":
                 if (
                     utime.ticks_diff(utime.ticks_ms(), last_fetch_time)
                     > current_device_config["configFetchInterval"]
