@@ -47,6 +47,8 @@ def get_config(device_id):
 @device_auth()
 def get_firmware_contents(relative_path):
     unencoded_relative_path = unquote(relative_path)
+    # Do our custom unencoding for slashes
+    unencoded_relative_path = unencoded_relative_path.replace("^$#", "/")
     print(unencoded_relative_path)
     file = services.get_firmware_contents(unencoded_relative_path)
     return file["contents"]
