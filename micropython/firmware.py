@@ -83,7 +83,6 @@ def firmware_update(device_config):
             # Write the file
             with open(firmware['relative_path'], 'wb') as f:
                 print(f'Writing firmware to {firmware["relative_path"]}')
-                print(firmware_response.content)
                 f.write(firmware_response.content)
                 versions[firmware['relative_path']] = firmware['version']
                 versions_modified = True
