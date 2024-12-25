@@ -74,7 +74,8 @@ def firmware_update(device_config):
         if update_available:
             # quote periods
             encoded_relative_path = firmware['relative_path'].replace('.', '%2E')
-            encoded_relative_path = encoded_relative_path.replace('/', '%2F')
+            # We need to make up our own encoding because the normal doesn't work with flask
+            encoded_relative_path = encoded_relative_path.replace('/', '^$#')
             firmware_response = requests.get(f'{api_host}/devices/firmware/{encoded_relative_path}', headers={'Authorization': device_secret})
             
             # Ensure directories exist before opening the file
