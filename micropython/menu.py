@@ -32,6 +32,7 @@ class menu(Activity):
 
         self.current_raw_display = []
 
+        self.hardware.display.clear()
         # First, convert to raw menu items to display
         for index, item in enumerate(self.menu_states[-1]["menu"]):
             if index == self.menu_states[-1]["selected_menu_item"]:
