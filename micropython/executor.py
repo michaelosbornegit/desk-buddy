@@ -1,4 +1,3 @@
-from apps.flappybuddy import flappybuddy
 import network
 import requests
 import utime
@@ -6,10 +5,12 @@ import asyncio
 from machine import Pin
 
 from utils import get_property_if_exists
-from secrets import ssid, ssid_password, device_secret, api_host, device_id
+from secrets import device_secret, api_host, device_id
 from hwconfig import DISPLAY, BUTTON, LED
 from dashboard import dashboard
 from menu import menu
+from apps.flappybuddy import flappybuddy
+from notifications import notifications
 from global_classes import Hardware, Functions, Secrets
 
 # User configurable constants
@@ -19,6 +20,8 @@ DEVICE_CYCLE_INTERVAL_MS = (
 BUTTON_LONG_PRESS_MS = (
     100  # how long the button needs to be held to trigger a long press
 )
+LED_BLINK_INTERVAL_MS = 10000  # how often the LED blinks
+LED_BLINK_DURATION_MS = 10  # how long the LED blinks for
 
 last_press_time = {}
 current_raw_display = None
@@ -32,17 +35,6 @@ button_holding_disabled = False
 functions = None
 hardware = None
 secrets = None
-
-
-def connectToNetwork():
-    sta_if = network.WLAN(network.STA_IF)
-    if not sta_if.isconnected():
-        print(f"Connecting to network...")
-        sta_if.active(True)
-        sta_if.connect(ssid, ssid_password)
-        while not sta_if.isconnected():
-            pass
-    print("Network config:", sta_if.ipconfig("addr4"))
 
 
 def display_raw(raw_data):
@@ -222,6 +214,7 @@ async def main():
         dashboard("dashboard", hardware, functions, secrets),
         menu("menu", hardware, functions, secrets),
         flappybuddy("flappybuddy", hardware, functions, secrets),
+        notifications("notifications", hardware, functions, secrets),
     ]
 
     await switch_activity("dashboard")
@@ -230,9 +223,10 @@ async def main():
 
     button_held_time = 0
     last_fetch_time = utime.ticks_ms()
+    last_blink_time = utime.ticks_ms()
     while True:
         # Check if button is being held, give button actions priority
-        if not BUTTON.value() and button_holding_disabled == False:
+        if not BUTTON.value() and not button_holding_disabled:
             button_held_time += DEVICE_CYCLE_INTERVAL_MS
             DISPLAY.fill_rect(
                 0, 62, round(128 * (button_held_time / BUTTON_LONG_PRESS_MS)), 2, 1
@@ -265,6 +259,21 @@ async def main():
                 ):
                     last_fetch_time = utime.ticks_ms()
                     asyncio.create_task(fetch_config())
+
+                if (
+                    current_device_config
+                    and len(current_device_config["notifications"]) > 0
+                ):
+                    if (
+                        utime.ticks_diff(utime.ticks_ms(), last_blink_time)
+                    ) > LED_BLINK_INTERVAL_MS:
+                        last_blink_time = utime.ticks_ms()
+                        LED.on()
+                    if (LED.value() == 1) and (
+                        utime.ticks_diff(utime.ticks_ms(), last_blink_time)
+                        > LED_BLINK_DURATION_MS
+                    ):
+                        LED.off()
 
             # Allow the current activity to do its thing
             await current_activity.render()

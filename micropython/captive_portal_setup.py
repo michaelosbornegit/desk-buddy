@@ -9,21 +9,23 @@ import time
 from hwconfig import DISPLAY
 from secrets import pairing_code
 
+
 def inet_aton(ip):
-    return bytes(map(int, ip.split('.')))
+    return bytes(map(int, ip.split(".")))
+
 
 def url_decode(s):
-    res = ''
+    res = ""
     i = 0
     length = len(s)
     while i < length:
         c = s[i]
-        if c == '+':
-            res += ' '
+        if c == "+":
+            res += " "
             i += 1
-        elif c == '%':
+        elif c == "%":
             if i + 2 < length:
-                res += chr(int(s[i+1:i+3], 16))
+                res += chr(int(s[i + 1 : i + 3], 16))
                 i += 3
             else:
                 res += c
@@ -33,20 +35,22 @@ def url_decode(s):
             i += 1
     return res
 
+
 def setup_ap():
     ap = network.WLAN(network.AP_IF)
     ap.active(True)
-    ap.config(essid=f'Buddy {pairing_code}')
-    ap.ifconfig(('192.168.4.1', '255.255.255.0', '192.168.4.1', '8.8.8.8'))
+    ap.config(essid=f"Buddy {pairing_code}")
+    ap.ifconfig(("192.168.4.1", "255.255.255.0", "192.168.4.1", "8.8.8.8"))
     DISPLAY.clear()
     DISPLAY.text("Connect to me", 0, 0, 1, 0, 128, 64, 1)
     DISPLAY.text("to set me up", 0, 8, 1, 0, 128, 64, 1)
     DISPLAY.text("WiFi Name:", 0, 16, 1, 0, 128, 64, 1)
     DISPLAY.text(f"Buddy {pairing_code}", 0, 24, 1, 0, 128, 64, 1)
-    DISPLAY.text("((i))", 0, 40, 1, 0, 128, 64, 1)
+    DISPLAY.text("((o))", 0, 40, 1, 0, 128, 64, 1)
     DISPLAY.text("|", 0, 48, 1, 0, 128, 64, 1)
     DISPLAY.text("[o_o]", 0, 56, 1, 0, 128, 64, 1)
     DISPLAY.show()
+
 
 def web_page():
     return """<!DOCTYPE html>
@@ -112,25 +116,26 @@ def web_page():
 </body>
 </html>"""
 
+
 def start_web_server():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    s.bind(('', 80))
+    s.bind(("", 80))
     s.listen(5)
-    print('Web server started on port 80')
+    print("Web server started on port 80")
     while True:
         conn, addr = s.accept()
-        print('Connection from', addr)
+        print("Connection from", addr)
         try:
             request = conn.recv(1024).decode()
-            print('Request content:', request)
-            if 'POST' in request:
-                post_data = request.split('\r\n\r\n')[1]
+            print("Request content:", request)
+            if "POST" in request:
+                post_data = request.split("\r\n\r\n")[1]
                 post_data = url_decode(post_data)
-                params = dict(pair.split('=') for pair in post_data.split('&'))
-                username = params.get('username', '')
-                password = params.get('password', '')
-                with open('wifi_config.py', 'w') as f:
+                params = dict(pair.split("=") for pair in post_data.split("&"))
+                username = params.get("username", "")
+                password = params.get("password", "")
+                with open("wifi_config.py", "w") as f:
                     f.write(f"ssid = '{username}'\nssid_password = '{password}'\n")
                 response = """<!DOCTYPE html>
 <html>
@@ -175,36 +180,53 @@ def start_web_server():
 </body>
 </html>
 """
-                conn.sendall('HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n'.encode() + response.encode())
+                conn.sendall(
+                    "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n".encode()
+                    + response.encode()
+                )
                 conn.close()
                 time.sleep(2)  # Delay to ensure response is sent
                 machine.reset()
-            elif '/generate_204' in request:
-                conn.sendall('HTTP/1.1 204 No Content\r\n\r\n'.encode())
+            elif "/generate_204" in request:
+                conn.sendall("HTTP/1.1 204 No Content\r\n\r\n".encode())
             else:
                 response = web_page()
-                conn.sendall('HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n'.encode() + response.encode())
+                conn.sendall(
+                    "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n".encode()
+                    + response.encode()
+                )
         except Exception as e:
-            print('Error handling request:', e)
+            print("Error handling request:", e)
         finally:
             conn.close()
 
+
 def start_dns_server():
-    ip = '192.168.4.1'
+    ip = "192.168.4.1"
     udps = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    udps.bind(('', 53))
-    print('DNS Server started on port 53')
+    udps.bind(("", 53))
+    print("DNS Server started on port 53")
     while True:
         try:
             data, addr = udps.recvfrom(1024)
-            dns_response = data[:2] + b'\x81\x80' + data[4:6]*2 + b'\x00\x00\x00\x00' + data[12:] + b'\xc0\x0c\x00\x01\x00\x01\x00\x00\x00\x3c\x00\x04' + inet_aton(ip)
+            dns_response = (
+                data[:2]
+                + b"\x81\x80"
+                + data[4:6] * 2
+                + b"\x00\x00\x00\x00"
+                + data[12:]
+                + b"\xc0\x0c\x00\x01\x00\x01\x00\x00\x00\x3c\x00\x04"
+                + inet_aton(ip)
+            )
             udps.sendto(dns_response, addr)
         except Exception as e:
-            print('DNS server error:', e)
+            print("DNS server error:", e)
+
 
 def main():
     setup_ap()
     _thread.start_new_thread(start_web_server, ())
     start_dns_server()
+
 
 main()

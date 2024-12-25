@@ -67,9 +67,12 @@ def firmware_check(device_config):
 def firmware_update(device_config):
     global versions
     DISPLAY.clear()
-    DISPLAY.text("Updating firmware", 0, 0, 1, 0, 128, 64, 1)
+    DISPLAY.text("Updating", 0, 0, 1, 0, 128, 64, 1)
+    DISPLAY.text("firmware!", 0, 8, 1, 0, 128, 64, 1)
     DISPLAY.text("Please wait...", 0, 16, 1, 0, 128, 64, 1)
-    DISPLAY.text("[o_o]", 0, 56, 1, 0, 128, 64, 1)
+    DISPLAY.text("o", 0, 40, 1, 0, 128, 64, 1)
+    DISPLAY.text("|", 0, 48, 1, 0, 128, 64, 1)
+    DISPLAY.text("[^_^]", 0, 56, 1, 0, 128, 64, 1)
     DISPLAY.show()
     with open(versions_file, "r") as f:
         versions = json.load(f)

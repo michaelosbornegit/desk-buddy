@@ -1,5 +1,6 @@
 import datetime
 import json
+from bson import ObjectId
 
 from app.db import db
 from app import messages
@@ -40,3 +41,18 @@ def get_read_messages(display_name, limit, offset):
 def get_recipients():
     recipients = db.devices.distinct("displayName")
     return recipients
+
+
+def read_message(message_id, device_id):
+    # get the display name of the device
+    device = db.devices.find_one({"deviceId": device_id})
+    display_name = device["displayName"]
+
+    print(f"Device {display_name} read message {message_id}")
+
+    db.messages.update_one(
+        {"_id": ObjectId(message_id), "to": {"$elemMatch": {"to": display_name}}},
+        {"$set": {"to.$.read": True}},
+    )
+
+    return {"result": "Message read"}
