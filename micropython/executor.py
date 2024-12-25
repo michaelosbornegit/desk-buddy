@@ -215,7 +215,7 @@ async def main():
         notifications("notifications", hardware, functions, secrets),
     ]
 
-    # await switch_activity("dashboard")
+    await switch_activity("dashboard")
 
     button_held_time = 0
     last_fetch_time = utime.ticks_ms()
