@@ -16,8 +16,8 @@ class flappybuddy(Activity):
         self.user_y_speed = 0
         self.pipes = []
         self.last_pipe_spawn = utime.ticks_ms()
-        self.pipe_spawn_rate = 1500
-        self.pipe_gap = 10
+        self.pipe_spawn_rate = 2000
+        self.pipe_gap = 20
         self.pipe_speed = 1
         self.game_over = False
         self.score = 0
@@ -27,8 +27,8 @@ class flappybuddy(Activity):
         if self.title:
             display = self.hardware.display
             display.fill(0)
-            display.load_font('text-16')
-            display.select_font('text-16')
+            display.load_font("text-16")
+            display.select_font("text-16")
             display.text("Flappy Buddy", 0, 0, 1, 0, 128, 64, 1)
             display.select_font(None)
             display.text("Press Button", 0, 32, 1, 0, 128, 64, 1)
@@ -39,7 +39,7 @@ class flappybuddy(Activity):
             self.functions.disable_button_holding(False)
             display = self.hardware.display
             display.fill(0)
-            display.select_font('text-16')
+            display.select_font("text-16")
             display.text("Game Over", 0, 0, 1, 0, 128, 64, 1)
             display.select_font(None)
             display.text(f"Score: {self.score}", 0, 32, 1, 0, 128, 64, 1)
@@ -83,7 +83,7 @@ class flappybuddy(Activity):
             if self.score % 5 == 0:
                 if self.pipe_spawn_rate > 1500:
                     self.pipe_spawn_rate -= 100
-                if self.pipe_gap > 15:
+                if self.pipe_gap > 10:
                     self.pipe_gap -= 1
             # check for collision
             if (
@@ -92,7 +92,6 @@ class flappybuddy(Activity):
                 and (self.user_y < pipe["y"] or self.user_y > pipe["y"] + self.pipe_gap)
             ):
                 self.game_over = True
-            
 
         display.rect(31, round(self.user_y), 2, 2, 1)
         self.last_render = utime.ticks_ms()
