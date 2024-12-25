@@ -155,6 +155,7 @@ def main():
             )
         except Exception as e:
             DISPLAY.clear()
+            DISPLAY.select_font(None)
             DISPLAY.text("Desk Buddy", 0, 0, 1, 0, 128, 64, 1)
             DISPLAY.text("encountered an", 0, 8, 1, 0, 128, 64, 1)
             DISPLAY.text("irrecoverable", 0, 16, 1, 0, 128, 64, 1)
