@@ -123,7 +123,7 @@ def set_current_raw_display(raw_display):
     last_raw_display = None
 
 
-def disable_button_holding(value = True):
+def disable_button_holding(value=True):
     global button_holding_disabled
     button_holding_disabled = value
 
@@ -165,7 +165,7 @@ async def load_new_activity(path):
 
     module = __import__(path.split(".")[0])
     activity = getattr(module, activityName)
-    activities.append(activity(activityName, functions, hardware, secrets))
+    activities.append(activity(activityName, hardware, functions, secrets))
 
 
 def register():
