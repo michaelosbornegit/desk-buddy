@@ -9,7 +9,6 @@ from secrets import device_secret, api_host, device_id
 from hwconfig import DISPLAY, BUTTON, LED
 from dashboard import dashboard
 from menu import menu
-from apps.flappybuddy import flappybuddy
 from notifications import notifications
 from global_classes import Hardware, Functions, Secrets
 
@@ -124,9 +123,9 @@ def set_current_raw_display(raw_display):
     last_raw_display = None
 
 
-def disable_button_holding():
+def disable_button_holding(value = True):
     global button_holding_disabled
-    button_holding_disabled = True
+    button_holding_disabled = value
 
 
 async def switch_activity(activity_name):
@@ -213,13 +212,10 @@ async def main():
     activities = [
         dashboard("dashboard", hardware, functions, secrets),
         menu("menu", hardware, functions, secrets),
-        flappybuddy("flappybuddy", hardware, functions, secrets),
         notifications("notifications", hardware, functions, secrets),
     ]
 
     # await switch_activity("dashboard")
-    # debugging
-    await switch_activity("flappybuddy")
 
     button_held_time = 0
     last_fetch_time = utime.ticks_ms()
