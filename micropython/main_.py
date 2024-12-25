@@ -9,7 +9,7 @@ import machine
 import os
 import asyncio
 
-from secrets import device_secret, api_host, device_id
+from secrets import device_secret, api_host, device_id, pairing_code
 from firmware import firmware_update
 from hwconfig import DISPLAY, BUTTON
 
@@ -32,8 +32,9 @@ def connectToNetwork(ssid, ssid_password):
 
 def register():
     response = requests.post(f'{api_host}/devices/register', headers={'Authorization': device_secret},
-                             json={'deviceId': device_id, 'username': 'test', 'password': 'test'})
+                             json={'deviceId': device_id})
 
+    print('Registering...')
     if response.status_code == 200:
         print('Registered successfully')
     else:
@@ -94,12 +95,26 @@ def main():
                 import captive_portal_setup
                 captive_portal_setup.main()
                 break
-            
 
             # Install necessary modules
             mip.install('copy')
 
-            device_config = register()
+            device_config = {}
+            while True:
+                try:
+                    device_config = register()
+                    break
+                except Exception as e:
+                    DISPLAY.clear()
+                    DISPLAY.text("Last step!", 0, 0, 1, 0, 128, 64, 1)
+                    DISPLAY.text("Scan the QR code", 0, 8, 1, 0, 128, 64, 1)
+                    DISPLAY.text("under me to create", 0, 16, 1, 0, 128, 64, 1)
+                    DISPLAY.text("your account", 0, 24, 1, 0, 128, 64, 1)
+                    DISPLAY.text(f"Pairing code:", 0, 32, 1, 0, 128, 64, 1)
+                    DISPLAY.text(f"${pairing_code}", 0, 40, 1, 0, 128, 64, 1)
+                    DISPLAY.text("[o_o]", 0, 56, 1, 0, 128, 64, 1)
+                    DISPLAY.show()
+                    time.sleep(5)
 
             # Update firmware on boot
             firmware_update(device_config)

@@ -7,6 +7,7 @@ import machine
 import time
 
 from hwconfig import DISPLAY
+from secrets import pairing_code
 
 def inet_aton(ip):
     return bytes(map(int, ip.split('.')))
@@ -35,13 +36,13 @@ def url_decode(s):
 def setup_ap():
     ap = network.WLAN(network.AP_IF)
     ap.active(True)
-    ap.config(essid='Desk Buddy')
+    ap.config(essid=f'Buddy {pairing_code}')
     ap.ifconfig(('192.168.4.1', '255.255.255.0', '192.168.4.1', '8.8.8.8'))
     DISPLAY.clear()
     DISPLAY.text("Connect to me", 0, 0, 1, 0, 128, 64, 1)
     DISPLAY.text("to set me up", 0, 8, 1, 0, 128, 64, 1)
     DISPLAY.text("WiFi Name:", 0, 16, 1, 0, 128, 64, 1)
-    DISPLAY.text(" Desk Buddy", 0, 24, 1, 0, 128, 64, 1)
+    DISPLAY.text(f"Buddy {pairing_code}", 0, 24, 1, 0, 128, 64, 1)
     DISPLAY.text("((i))", 0, 40, 1, 0, 128, 64, 1)
     DISPLAY.text("|", 0, 48, 1, 0, 128, 64, 1)
     DISPLAY.text("[o_o]", 0, 56, 1, 0, 128, 64, 1)
@@ -131,7 +132,49 @@ def start_web_server():
                 password = params.get('password', '')
                 with open('wifi_config.py', 'w') as f:
                     f.write(f"ssid = '{username}'\nssid_password = '{password}'\n")
-                response = """<h1>Thank you! You're all set!</h1>"""
+                response = """<!DOCTYPE html>
+<html>
+<head>
+    <title>Thank You!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { 
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f8ff; 
+            font-family: Arial, sans-serif; 
+        }
+        h1 { 
+            color: #333; 
+            text-align: center; 
+        }
+        .message-container { 
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            max-width: 300px; 
+            width: 100%; 
+            background-color: #fff; 
+            padding: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+            text-align: center;
+        }
+        .emoji { font-size: 48px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="emoji">🎉</div>
+    <div class="message-container">
+        <h1>Thank You!</h1>
+        <p>Continue to follow the steps on your buddy.</p>
+    </div>
+</body>
+</html>
+"""
                 conn.sendall('HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n'.encode() + response.encode())
                 conn.close()
                 time.sleep(2)  # Delay to ensure response is sent
