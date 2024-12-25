@@ -55,8 +55,9 @@ const Home = (): JSX.Element => {
         sx={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between' }}
         color="secondary"
         endIcon={<Visibility />}
+        disabled
       >
-        view read messages
+        view read messages (coming soon)
       </Button>
       <Button
         variant="contained"
@@ -68,8 +69,9 @@ const Home = (): JSX.Element => {
         sx={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between' }}
         color="secondary"
         endIcon={<Settings />}
+        disabled
       >
-        customize buddy
+        customize buddy (coming soon)
       </Button>
       <Alert severity="info" sx={{ marginBottom: '32px' }}>
         Buddy messed up?
