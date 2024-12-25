@@ -43,7 +43,7 @@ class dashboard(Activity):
             self.current_task = asyncio.create_task(self.fetch_dashboard())
 
         # Render every 0.1 seconds
-        if utime.ticks_diff(curr_time, self.last_render_time) > 100:
+        if utime.ticks_diff(curr_time, self.last_render_time) > 300:
             if self.current_dashboard_data:
                 filled_in_dashbaord = copy.deepcopy(self.current_dashboard_data)
                 # Replace content with what device can provide

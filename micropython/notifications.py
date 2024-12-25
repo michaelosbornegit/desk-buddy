@@ -38,6 +38,7 @@ class notifications(Activity):
                     self.hardware.display.text("notifications!", 0, 8, 1, 0, 128, 64, 1)
                     self.hardware.display.text("Returning", 0, 16, 1, 0, 128, 64, 1)
                     self.hardware.display.text("to menu...", 0, 24, 1, 0, 128, 64, 1)
+                    self.hardware.display.show()
                     await asyncio.sleep(5)
                     self.current_notification = None
                     await self.functions.switch_activity("dashboard")
@@ -45,7 +46,8 @@ class notifications(Activity):
                     self.current_notification = (
                         self.functions.get_current_device_config()["notifications"][0]
                     )
-                    if notification_response.json()["type"] == "message":
+
+                    if self.current_notification["type"] == "message":
                         self.currently_viewing = "from"
                 self.rendered = False
             else:
@@ -53,6 +55,7 @@ class notifications(Activity):
                 self.hardware.display.text("Error marking", 0, 0, 1, 0, 128, 64, 1)
                 self.hardware.display.text("notification as", 0, 8, 1, 0, 128, 64, 1)
                 self.hardware.display.text("read", 0, 16, 1, 0, 128, 64, 1)
+                self.hardware.display.show()
                 await asyncio.sleep(5)
                 await self.functions.switch_activity("dashboard")
 
@@ -114,7 +117,7 @@ class notifications(Activity):
                             "message"
                         ].split("\n")
                         for i, line in enumerate(split_content):
-                            self.hardware.display.text(line, 0, i * 8, 1, 0, 128, 64, 1)
+                            self.hardware.display.text(line, 0, i * 8, 0, 0, 128, 64, 1)
             self.rendered = True
 
     async def button_click(self):
