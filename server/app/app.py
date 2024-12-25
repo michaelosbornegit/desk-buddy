@@ -43,7 +43,7 @@ def create_app(testing=False):
         id="update_firmware",
         func=update_firmware,
         trigger="interval",
-        seconds=2,
+        seconds=120,
     )
 
     socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
