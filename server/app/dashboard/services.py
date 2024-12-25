@@ -22,7 +22,7 @@ def get_dashboard(device_id):
                 {
                     "height": 16,
                     "children": [
-                        {"content": f"{get_time()}", "font": "text-16", "horizAlign": 2},
+                        {"content": "__CURRENT_DEVICE_TIME__", "font": "text-16", "horizAlign": 2},
                         {
                             "content": "\x59",
                             "font": "icons-16-1",

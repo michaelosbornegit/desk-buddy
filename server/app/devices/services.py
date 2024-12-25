@@ -9,63 +9,9 @@ from app.messages import services as message_services
 DEFAULT_DEVICE_CONFIG = {
     "dashboard": {
         "widgets": ["time2row", "configureMeNote2row"],
-        "dashboardFetchInterval": (1 / 2) * 1000,
+        "dashboardFetchInterval": 5000,
     },
-    "menu": [
-        {
-            "label": "Games",
-            "children": [
-                {
-                    "label": "Reflexes",
-                    "action": "fetchExec",
-                    "path": "modules/games/reflexes",
-                },
-                {
-                    "label": "Simon Says",
-                    "action": "fetchExec",
-                    "path": "modules/games/simon-says",
-                },
-                {
-                    "label": "Beat keeper",
-                    "action": "fetchExec",
-                    "path": "modules/games/simon-says",
-                },
-                {
-                    "label": "Back",
-                    "action": "back",
-                },
-            ],
-        },
-        {
-            "label": "Ask Buddy",
-            "children": [
-                {
-                    "label": "Motivation",
-                    "action": "fetchExec",
-                    "path": "modules/ask-buddy/motivation",
-                },
-                {
-                    "label": "Meaning",
-                    "action": "fetchExec",
-                    "path": "modules/ask-buddy/meaning",
-                },
-                {
-                    "label": "Joke",
-                    "action": "fetchExec",
-                    "path": "modules/ask-buddy/joke",
-                },
-                {
-                    "label": "Back",
-                    "action": "back",
-                },
-            ],
-        },
-        {
-            "label": "Go Home",
-            "action": "home",
-        },
-    ],
-    "configFetchInterval": 1000,
+    "configFetchInterval": 10000,
 }
 
 

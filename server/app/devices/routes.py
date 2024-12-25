@@ -31,7 +31,6 @@ def logout():
 def device_register():
     request_data = request.get_json()
     device_config = services.get_config(request_data["deviceId"])
-    print(device_config)
     if device_config["displayName"] is None:
         return abort(400, "Device not registered")
     return device_config
@@ -49,6 +48,5 @@ def get_firmware_contents(relative_path):
     unencoded_relative_path = unquote(relative_path)
     # Do our custom unencoding for slashes
     unencoded_relative_path = unencoded_relative_path.replace("^$#", "/")
-    print(unencoded_relative_path)
     file = services.get_firmware_contents(unencoded_relative_path)
     return file["contents"]
