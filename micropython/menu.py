@@ -32,7 +32,6 @@ class menu(Activity):
 
         self.current_raw_display = []
 
-        self.hardware.display.clear()
         # First, convert to raw menu items to display
         for index, item in enumerate(self.menu_states[-1]["menu"]):
             if index == self.menu_states[-1]["selected_menu_item"]:
@@ -84,6 +83,7 @@ class menu(Activity):
         self.needs_render = True
 
     async def button_long_click(self):
+        self.hardware.display.clear()
         current_menu_state = self.menu_states[-1]
         if (
             current_menu_state["selected_menu_item"]
