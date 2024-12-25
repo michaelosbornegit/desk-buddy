@@ -48,7 +48,6 @@ const Login = (): JSX.Element => {
         }}
         fullWidth
         sx={{ marginBottom: '32px' }}
-        color="secondary"
       >
         Register My Buddy
       </Button>
