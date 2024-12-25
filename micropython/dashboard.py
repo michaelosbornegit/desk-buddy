@@ -8,7 +8,7 @@ import copy
 from activity import Activity
 
 
-class Dashboard(Activity):
+class dashboard(Activity):
     def __init__(self, name, hardware, functions, secrets):
         super().__init__(name, hardware, functions, secrets)
         # Set up instance specific variables

@@ -1,4 +1,4 @@
-from apps.flappybuddy import FlappyBuddy
+from apps.flappybuddy import flappybuddy
 import network
 import requests
 import utime
@@ -8,8 +8,8 @@ from machine import Pin
 from utils import get_property_if_exists
 from secrets import ssid, ssid_password, device_secret, api_host, device_id
 from hwconfig import DISPLAY, BUTTON, LED
-from dashboard import Dashboard
-from menu import Menu
+from dashboard import dashboard
+from menu import menu
 from global_classes import Hardware, Functions, Secrets
 
 # User configurable constants
@@ -29,6 +29,9 @@ current_activity = None
 button_long_press = False
 button_click = False
 button_holding_disabled = False
+functions = None
+hardware = None
+secrets = None
 
 
 def connectToNetwork():
@@ -152,6 +155,28 @@ async def switch_activity(activity_name):
         print(f"Activity {activity_name} not found")
 
 
+async def unload_activity(path):
+    global activities
+    fileName = path.split("/")[-1]
+    activityName = fileName.split(".")[0]
+    # remove existing clones of the activity
+    # to hopefully get garbage collected
+    for index, existing_activity in enumerate(activities):
+        if existing_activity.name == activityName:
+            activities.pop(index)
+
+
+async def load_new_activity(path):
+    global activities, functions, hardware, secrets
+    unload_activity(path)
+    fileName = path.split("/")[-1]
+    activityName = fileName.split(".")[0]
+
+    module = __import__(path)
+    activity = getattr(module, activityName)
+    activities.append(activity(functions, hardware, secrets))
+
+
 def register():
     response = requests.post(
         f"{api_host}/devices/register",
@@ -175,7 +200,10 @@ async def main():
         on_dashboard, \
         current_task, \
         button_click, \
-        button_long_press
+        button_long_press, \
+        hardware, \
+        functions, \
+        secrets
 
     current_device_config = register()
 
@@ -185,18 +213,20 @@ async def main():
         switch_activity,
         get_current_device_config,
         disable_button_holding,
+        load_new_activity,
+        unload_activity,
     )
     secrets = Secrets(device_secret, api_host, device_id)
 
     activities = [
-        Dashboard("Dashboard", hardware, functions, secrets),
-        Menu("Menu", hardware, functions, secrets),
-        FlappyBuddy("FlappyBuddy", hardware, functions, secrets),
+        dashboard("dashboard", hardware, functions, secrets),
+        menu("menu", hardware, functions, secrets),
+        flappybuddy("flappybuddy", hardware, functions, secrets),
     ]
 
     await switch_activity("Dashboard")
     # debugging
-    # await switch_activity('FlappyBuddy')
+    # await switch_activity('flappybuddy')
 
     button_held_time = 0
     last_fetch_time = utime.ticks_ms()

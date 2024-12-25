@@ -6,7 +6,7 @@ import copy
 from activity import Activity
 
 
-class FlappyBuddy(Activity):
+class flappybuddy(Activity):
     def __init__(self, name, hardware, functions, secrets):
         super().__init__(name, hardware, functions, secrets)
         self.refresh_rate = 1000 / 120  # 120fps

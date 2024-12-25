@@ -1,3 +1,4 @@
+from micropython.executor import switch_activity
 import utime
 import asyncio
 import requests
@@ -6,7 +7,7 @@ import copy
 from activity import Activity
 
 
-class Menu(Activity):
+class menu(Activity):
     def __init__(self, name, hardware, functions, secrets):
         super().__init__(name, hardware, functions, secrets)
         # Set up instance specific variables
@@ -119,11 +120,14 @@ class Menu(Activity):
                 action = current_menu_state["menu"][
                     current_menu_state["selected_menu_item"]
                 ]["action"]
-                if action == "fetchExec":
+                if action == "activity":
                     path = current_menu_state["menu"][
                         current_menu_state["selected_menu_item"]
                     ]["path"]
-                    await self.functions.fetch_exec(path)
+                    await self.functions.load_new_activity(path)
+                    await self.functions.switch_activity(
+                        path.split("/")[-1].split(".")[0]
+                    )
                 else:
                     print(f"Unknown action: {action}")
 

@@ -49,7 +49,7 @@ def build_apps_menu():
             child["children"].append(
                 {
                     "label": app["relative_path"].split("/")[-1],
-                    "action": "exec",
+                    "action": "activity",
                     "path": app["relative_path"],
                 }
             )
@@ -61,7 +61,7 @@ def build_apps_menu():
             parent["children"].append(
                 {
                     "label": app["relative_path"].split("/")[-1],
-                    "action": "exec",
+                    "action": "activity",
                     "path": app["relative_path"],
                 }
             )
@@ -69,7 +69,7 @@ def build_apps_menu():
             menu_item["children"].append(
                 {
                     "label": app["relative_path"],
-                    "action": "exec",
+                    "action": "activity",
                     "path": app["relative_path"],
                 }
             )
@@ -80,7 +80,7 @@ def build_apps_menu():
 def notifications_menu_item(device_config):
     return {
         "label": f"{len(device_config['notifications'])} Notifications",
-        "action": "exec",
+        "action": "activity",
         "path": "notifications.py",
     }
 
