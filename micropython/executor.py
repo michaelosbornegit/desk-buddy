@@ -129,7 +129,13 @@ def disable_button_holding(value=True):
 
 
 async def switch_activity(activity_name):
-    global activities, current_activity, button_holding_disabled
+    global \
+        activities, \
+        current_activity, \
+        button_holding_disabled, \
+        current_raw_display, \
+        last_raw_display, \
+        DISPLAY
     new_activity = None
     for activity in activities:
         if activity.name == activity_name:
@@ -137,6 +143,10 @@ async def switch_activity(activity_name):
             break
 
     if new_activity:
+        # Reset things that should always be reset between activities
+        current_raw_display = None
+        last_raw_display = None
+        DISPLAY.clear()
         button_holding_disabled = False
         if current_activity:
             await current_activity.on_unmount()

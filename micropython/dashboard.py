@@ -46,7 +46,7 @@ class dashboard(Activity):
             # await fetch_dashboard()
             self.current_task = asyncio.create_task(self.fetch_dashboard())
 
-        # Render every 0.1 seconds
+        # Render every 0.3 seconds
         if utime.ticks_diff(curr_time, self.last_render_time) > 300:
             if self.current_dashboard_data:
                 filled_in_dashbaord = copy.deepcopy(self.current_dashboard_data)
@@ -81,6 +81,9 @@ class dashboard(Activity):
         await self.functions.switch_activity("menu")
 
     async def on_mount(self):
+        self.last_fetch_time = utime.ticks_ms()
+        self.last_render_time = utime.ticks_ms()
+        self.current_dashboard_data = None
         self.hardware.display.clear()
         if self.current_task:
             await self.current_task

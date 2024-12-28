@@ -31,6 +31,7 @@ def update_firmware():
 
                 if existing_entry:
                     if existing_entry["contents"] != file_contents:
+                        print(f"Updating {relative_path}")
                         db.software_versions.update_one(
                             {"_id": existing_entry["_id"]},
                             {"$set": {"contents": file_contents}, "$inc": {"version": 1}},
