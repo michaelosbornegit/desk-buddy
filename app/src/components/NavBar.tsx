@@ -12,7 +12,7 @@ const NavBar = (): JSX.Element => {
     <>
       <AppBar position="static" sx={{ marginBottom: '16px', width: '100vw' }} color="secondary">
         <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div onClick={() => navigate('/home')}>
+          <div onClick={() => navigate('/home')} style={{ cursor: 'pointer' }}>
             <Typography variant="h6">🤖 Desk Buddy</Typography>
           </div>
           <Button color="inherit" onClick={() => logout()}>
