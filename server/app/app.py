@@ -43,7 +43,7 @@ def create_app(testing=False):
         id="update_firmware",
         func=update_firmware,
         trigger="interval",
-        seconds=120,
+        seconds=int(Config.VERSION_UPDATE_CHECK_INTERVAL) if Config.VERSION_UPDATE_CHECK_INTERVAL else 120,
     )
 
     socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
