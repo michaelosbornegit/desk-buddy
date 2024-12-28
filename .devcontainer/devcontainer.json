@@ -42,7 +42,8 @@
         "kamikillerto.vscode-colorize",
         "esbenp.prettier-vscode",
         "charliermarsh.ruff",
-        "dbaeumer.vscode-eslint"
+        "dbaeumer.vscode-eslint",
+        "GitHub.vscode-pull-request-github"
       ]
     }
   },
