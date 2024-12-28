@@ -29,26 +29,7 @@ class notifications(Activity):
             )
             if notification_response.status_code == 200:
                 self.functions.get_current_device_config()["notifications"].pop(0)
-                if (
-                    len(self.functions.get_current_device_config()["notifications"])
-                    == 0
-                ):
-                    self.hardware.display.clear()
-                    self.hardware.display.text("No", 0, 0, 1, 0, 128, 64, 1)
-                    self.hardware.display.text("notifications!", 0, 8, 1, 0, 128, 64, 1)
-                    self.hardware.display.text("Returning", 0, 16, 1, 0, 128, 64, 1)
-                    self.hardware.display.text("to menu...", 0, 24, 1, 0, 128, 64, 1)
-                    self.hardware.display.show()
-                    await asyncio.sleep(5)
-                    self.current_notification = None
-                    await self.functions.switch_activity("dashboard")
-                else:
-                    self.current_notification = (
-                        self.functions.get_current_device_config()["notifications"][0]
-                    )
-
-                    if self.current_notification["type"] == "message":
-                        self.currently_viewing = "from"
+                self.current_notification = None
                 self.rendered = False
             else:
                 self.hardware.display.clear()
@@ -66,6 +47,7 @@ class notifications(Activity):
     async def render(self):
         if not self.rendered:
             if self.current_notification:
+                # We have a notification to display, display it
                 if self.current_notification["type"] == "message":
                     if self.currently_viewing == "from":
                         self.hardware.display.clear()
@@ -118,7 +100,25 @@ class notifications(Activity):
                         ].split("\n")
                         for i, line in enumerate(split_content):
                             self.hardware.display.text(line, 0, i * 8, 0, 0, 128, 64, 1)
-            self.rendered = True
+                self.rendered = True
+            else:
+                # Figure out if we have a current notification
+                if len(self.functions.get_current_device_config()["notifications"]) > 0:
+                    self.current_notification = (
+                        self.functions.get_current_device_config()["notifications"][0]
+                    )
+                    if self.current_notification["type"] == "message":
+                        self.currently_viewing = "from"
+                else:
+                    self.hardware.display.clear()
+                    self.hardware.display.select_font(None)
+                    self.hardware.display.text("No", 0, 0, 1, 0, 128, 64, 1)
+                    self.hardware.display.text("notifications!", 0, 8, 1, 0, 128, 64, 1)
+                    self.hardware.display.text("Returning", 0, 24, 1, 0, 128, 64, 1)
+                    self.hardware.display.text("to menu...", 0, 32, 1, 0, 128, 64, 1)
+                    self.hardware.display.show()
+                    await asyncio.sleep(5)
+                    await self.functions.switch_activity("dashboard")
 
     async def button_click(self):
         if self.current_notification:
@@ -143,20 +143,8 @@ class notifications(Activity):
 
     async def on_mount(self):
         self.hardware.display.clear()
-        notifications = self.functions.get_current_device_config()["notifications"]
-        if len(notifications) == 0:
-            self.hardware.display.select_font(None)
-            self.hardware.display.text("No", 0, 0, 1, 0, 128, 64, 1)
-            self.hardware.display.text("notifications!", 0, 8, 1, 0, 128, 64, 1)
-            self.hardware.display.text("Returning", 0, 16, 1, 0, 128, 64, 1)
-            self.hardware.display.text("to menu...", 0, 24, 1, 0, 128, 64, 1)
-            await asyncio.sleep(5)
-            await self.functions.switch_activity("dashboard")
-            return
-        else:
-            self.current_notification = notifications[0]
-            if self.current_notification["type"] == "message":
-                self.currently_viewing = "from"
 
     async def on_unmount(self):
-        self.functions.unload_activity("notifications")
+        # self.functions.unload_activity("notifications")
+        # await self.functions.switch_activity("dashboard")
+        pass
