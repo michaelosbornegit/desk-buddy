@@ -9,7 +9,13 @@ def update_firmware():
         for file_name in files:
             file_path = os.path.join(root, file_name)
 
-            if file_name not in ("main.py", "main_.py") and (file_name.endswith((".py", ".pf"))):
+            if file_name not in (
+                "main.py",
+                "main_.py",
+                "wifi_config.py",
+                "hwconfig_supermini.py",
+                "hwconfig_xiao.py",
+            ) and (file_name.endswith((".py", ".pf"))):
                 relative_path = os.path.relpath(file_path, folder_path)
 
                 file_contents = None
