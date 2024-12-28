@@ -13,6 +13,7 @@
 **/cache
 **/*.pyc
 **/secrets.py
+**/wifi_config.py
 
 **/__pycache__
 **/.pytest_cache
