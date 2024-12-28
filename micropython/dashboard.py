@@ -1,11 +1,15 @@
-from utils import get_los_angeles_time
+from utils import get_los_angeles_time, get_property_if_exists
 import utime
 import time
 import asyncio
 import requests
 import copy
+import machine
 
+from firmware import firmware_update
 from activity import Activity
+import sys
+import executor
 
 
 class dashboard(Activity):
@@ -65,10 +69,15 @@ class dashboard(Activity):
                 self.last_render_time = utime.ticks_ms()
 
     async def button_click(self):
-        pass
+        if get_property_if_exists(
+            self.functions.get_current_device_config(), "devMode"
+        ):
+            print("Dev mode enabled, rebooting!")
+            machine.soft_reset()
 
     async def button_long_click(self):
         await self.current_task
+        await self.functions.load_new_activity("menu")
         await self.functions.switch_activity("menu")
 
     async def on_mount(self):

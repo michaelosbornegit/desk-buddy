@@ -143,7 +143,7 @@ async def switch_activity(activity_name):
         await new_activity.on_mount()
         current_activity = new_activity
     else:
-        print(f"Activity {activity_name} not found")
+        print(f"Activity {activity_name} not found. Is it loaded?")
 
 
 async def unload_activity(path):
@@ -159,7 +159,7 @@ async def unload_activity(path):
 
 async def load_new_activity(path):
     global activities, functions, hardware, secrets
-    unload_activity(path)
+    await unload_activity(path)
     fileName = path.split("/")[-1]
     activityName = fileName.split(".")[0]
 
@@ -209,12 +209,9 @@ async def main():
     )
     secrets = Secrets(device_secret, api_host, device_id)
 
-    activities = [
-        dashboard("dashboard", hardware, functions, secrets),
-        menu("menu", hardware, functions, secrets),
-        notifications("notifications", hardware, functions, secrets),
-    ]
+    activities = []
 
+    await load_new_activity("dashboard.py")
     await switch_activity("dashboard")
 
     button_held_time = 0
@@ -239,6 +236,7 @@ async def main():
                 await current_activity.button_long_click()
             elif button_click:
                 button_click = False
+                print(activities)
 
                 await current_activity.button_click()
 
@@ -255,7 +253,6 @@ async def main():
                 ):
                     last_fetch_time = utime.ticks_ms()
                     asyncio.create_task(fetch_config())
-
                 if (
                     current_device_config
                     and len(current_device_config["notifications"]) > 0

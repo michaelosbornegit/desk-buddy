@@ -13,3 +13,4 @@ class Config:
     API_HOST = os.getenv("API_HOST")
     APP_HOST = os.getenv("APP_HOST")
     PORT = os.getenv("PORT")
+    VERSION_UPDATE_CHECK_INTERVAL = os.getenv("VERSION_UPDATE_CHECK_INTERVAL")
