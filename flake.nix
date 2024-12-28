@@ -19,6 +19,7 @@
           entr
           nodejs_22
           tmux
+          screen
         ];
       };
     in

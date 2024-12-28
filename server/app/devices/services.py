@@ -7,10 +7,10 @@ from app.messages import services as message_services
 
 DEFAULT_DEVICE_CONFIG = {
     "dashboard": {
-        "widgets": ["time2row", "configureMeNote2row"],
-        "dashboardFetchInterval": 5000,
+        "widgets": ["time4row", "buddy"],
+        "dashboardFetchInterval": 30000,
     },
-    "configFetchInterval": 10000,
+    "configFetchInterval": 60000,
 }
 
 
