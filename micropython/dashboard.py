@@ -57,20 +57,20 @@ class dashboard(Activity):
             ]
         ):
             self.last_dashboard_fetch_time = curr_time
-            # await fetch_dashboard()
-            if self.current_tasks[0]:
-                self.current_tasks[0].cancel()
-            self.current_tasks[0] = asyncio.create_task(self.fetch_dashboard())
+
+            # don't allow multiple fetches to happen at once
+            if self.current_tasks[0] and self.current_tasks[0].done():
+                self.current_tasks[0] = asyncio.create_task(self.fetch_dashboard())
 
         # Check if it's time to refresh device config
         if (
-            utime.ticks_diff(utime.ticks_ms(), self.last_config_fetch_time)
+            utime.ticks_diff(curr_time, self.last_config_fetch_time)
             > self.functions.get_current_device_config()["configFetchInterval"]
         ):
             self.last_config_fetch_time = utime.ticks_ms()
-            if self.current_tasks[1]:
-                self.current_tasks[1].cancel()
-            self.current_tasks[1] = asyncio.create_task(self.fetch_config())
+            # don't allow multiple fetches to happen at once
+            if self.current_tasks[1] and self.current_tasks[1].done():
+                self.current_tasks[1] = asyncio.create_task(self.fetch_config())
 
         # Check if we need to blink the LED for notifications
         if (
@@ -121,6 +121,7 @@ class dashboard(Activity):
         for task in self.current_tasks:
             if task:
                 task.cancel()
+
         await self.functions.load_new_activity("menu")
         await self.functions.switch_activity("menu")
 

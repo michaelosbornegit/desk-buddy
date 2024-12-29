@@ -103,6 +103,11 @@ def get_current_device_config():
     return current_device_config
 
 
+def set_current_device_config(new_config):
+    global current_device_config
+    current_device_config = new_config
+
+
 def set_current_raw_display(raw_display):
     global current_raw_display, last_raw_display
     current_raw_display = raw_display
@@ -164,11 +169,6 @@ async def load_new_activity(path):
     activities.append(activity(activityName, hardware, functions, secrets))
 
 
-async def set_current_device_config(new_config):
-    global current_device_config
-    current_device_config = new_config
-
-
 def register():
     response = requests.post(
         f"{api_host}/devices/register",
@@ -204,10 +204,10 @@ async def main():
         set_current_raw_display,
         switch_activity,
         get_current_device_config,
+        set_current_device_config,
         disable_button_holding,
         load_new_activity,
         unload_activity,
-        set_current_device_config,
     )
     secrets = Secrets(device_secret, api_host, device_id)
 
