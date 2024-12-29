@@ -15,8 +15,9 @@ import math
 import display.packed_font as packed_font
 import struct
 
+
 class Enhanced_Display:
-    def __init__(self, address=0x3C,bus=None, freq=None, sda=None, scl=None, asw=None):
+    def __init__(self, address=0x3C, bus=None, freq=None, sda=None, scl=None, asw=None):
         self._display = create_PiicoDev_SSD1306(address, bus, freq, sda, scl, asw)
         self.width = WIDTH
         self.height = HEIGHT
@@ -24,11 +25,11 @@ class Enhanced_Display:
         self.selected_font = None
 
         if self._display.comms_err:
-            print('Display not detected.')
+            print("Display not detected.")
             self._display = None
         else:
             self.is_present = True
-            print(f'Detected display of size {self.width} x {self.height} pixels.')
+            print(f"Detected display of size {self.width} x {self.height} pixels.")
 
     # --------------- Enhanced functions --------------
 
@@ -37,7 +38,7 @@ class Enhanced_Display:
 
         Args:
             font_name (string): Name of the font, without the .pf extension.
-        """    
+        """
         if self.is_present:
             packed_font.load_font(font_name)
 
@@ -46,13 +47,13 @@ class Enhanced_Display:
 
         Args:
             font_name_list (list[string]): A list of font names (without the .pf extension) to load.
-        """        
+        """
         if self.is_present:
             for font_name in font_name_list:
-                packed_font.load_font(font_name)        
+                packed_font.load_font(font_name)
 
     def unload_all_fonts(self):
-        """ Unload all fonts and select the built in font as the current font."""
+        """Unload all fonts and select the built in font as the current font."""
         if self.is_present:
             packed_font.unload_all_fonts()
             self.selected_font = None
@@ -62,7 +63,7 @@ class Enhanced_Display:
 
         Args:
             font_name (string): Name of the font to select or None to select the built in font.
-        """    
+        """
         self.selected_font = font_name
 
     def get_text_size(self, text):
@@ -79,27 +80,46 @@ class Enhanced_Display:
             packed_font.select_font(self.selected_font)
             return packed_font.get_text_size(text)
         return 0, 0
-        
-    def text(self, text, x, y, horiz_align=0, vert_align=0, max_width=WIDTH, max_height=HEIGHT, c=1):
+
+    def text(
+        self,
+        text,
+        x,
+        y,
+        horiz_align=0,
+        vert_align=0,
+        max_width=WIDTH,
+        max_height=HEIGHT,
+        c=1,
+    ):
         """Render a text string to the display in the currently selected font, with optional alignment.
 
         Args:
-            text (string): Text to render.  
-            x (int): X coordinate to begin text rendering.  
+            text (string): Text to render.
+            x (int): X coordinate to begin text rendering.
             y (int): Y coordinate to begin text rendering.
             horiz_align (int, optional): 0 = Left, 1 = Center, 2 = Right. Defaults to 0.
             vert_align (int, optional): 0 = Top, 1 = Center, 2 = Bottom. Defaults to 0.
             max_width (int, optional): Width of the box to align text horizontally within. Defaults to display width.
             max_height (int, optional): Height of the box to align text vertically within. Defaults to display height.
             c (int, optional): Color to render text in. Defaults to 1.
-        """    
+        """
         if self.is_present:
             packed_font.select_font(self.selected_font)
-            packed_font.text(self._display, text, x, y, max_width, horiz_align, max_height, vert_align, c)
+            packed_font.text(
+                self._display,
+                text,
+                x,
+                y,
+                max_width,
+                horiz_align,
+                max_height,
+                vert_align,
+                c,
+            )
 
     def clear(self):
-        """Clear the display and show the blank screen.
-        """        
+        """Clear the display and show the blank screen."""
         if self.is_present:
             self._display.fill(0)
             self._display.show()
@@ -109,9 +129,8 @@ class Enhanced_Display:
 
         Args:
             filename (string): The name of the file to save the screenshot to (e.g. screenshot.bmp)
-        """        
+        """
         if self.is_present:
-        
             # Rotate display buffer bytes into rows of bytes
             rows = []
             for y in range(self.height):
@@ -121,7 +140,7 @@ class Enhanced_Display:
                     val = 0
                     for b in range(8):
                         yval = self._display.buffer[(y // 8) * self.width + x * 8 + b]
-                        val += (1 << (7-b)) if ((yval >> ybit) & 1) == 1 else 0
+                        val += (1 << (7 - b)) if ((yval >> ybit) & 1) == 1 else 0
 
                     row.append(val)
                 rows.append(row)
@@ -133,22 +152,28 @@ class Enhanced_Display:
                 f.write(data)
 
     def _bmp(self, rows, width):
-        """ Create a bitmap blob from a list of rows, each row containing a list of bytes.
-            Code from https://stackoverflow.com/questions/8729459/how-do-i-create-a-bmp-file-with-pure-python
+        """Create a bitmap blob from a list of rows, each row containing a list of bytes.
+        Code from https://stackoverflow.com/questions/8729459/how-do-i-create-a-bmp-file-with-pure-python
         """
 
-        mult4 = lambda n: int(math.ceil(n/4))*4
-        mult8 = lambda n: int(math.ceil(n/8))*8
+        mult4 = lambda n: int(math.ceil(n / 4)) * 4
+        mult8 = lambda n: int(math.ceil(n / 8)) * 8
         lh = lambda n: struct.pack("<h", n)
         li = lambda n: struct.pack("<i", n)
 
-        h, wB = len(rows), int(mult8(width)/8)
-        s, pad = li(mult4(wB)*h+0x20), [0]*(mult4(wB)-wB)
-        s = li(mult4(width)*h+0x20)
-        return (b"BM" + s + b"\x00\x00\x00\x00\x20\x00\x00\x00\x0C\x00\x00\x00" +
-                lh(width) + lh(h) + b"\x01\x00\x01\x00\x00\x00\x00\xff\xff\xff" +
-                b"".join([bytes(row+pad) for row in reversed(rows)]))
-    
+        h, wB = len(rows), int(mult8(width) / 8)
+        s, pad = li(mult4(wB) * h + 0x20), [0] * (mult4(wB) - wB)
+        s = li(mult4(width) * h + 0x20)
+        return (
+            b"BM"
+            + s
+            + b"\x00\x00\x00\x00\x20\x00\x00\x00\x0c\x00\x00\x00"
+            + lh(width)
+            + lh(h)
+            + b"\x01\x00\x01\x00\x00\x00\x00\xff\xff\xff"
+            + b"".join([bytes(row + pad) for row in reversed(rows)])
+        )
+
     # --------------- Frame buffer functions --------------
 
     def fill(self, c=0):
@@ -209,25 +234,18 @@ class Enhanced_Display:
         if self.is_present:
             self._display.rotate(rotate)
 
-    def circ(self,x,y,r,t=1,c=1):
+    def circ(self, x, y, r, t=1, c=1):
         if self.is_present:
-            self._display.circ(x,y,r,t,c)
+            self._display.circ(x, y, r, t, c)
 
-    def arc(self,x,y,r,stAng,enAng,t=0,c=1):
+    def arc(self, x, y, r, stAng, enAng, t=0, c=1):
         if self.is_present:
-            self._display.arc(x,y,r,stAng,enAng,t,c)
+            self._display.arc(x, y, r, stAng, enAng, t, c)
 
     def load_pbm(self, filename, c):
         if self.is_present:
-            self._display.load_pbm(filename,c)
+            self._display.load_pbm(filename, c)
 
     def updateGraph2D(self, graph, value):
         if self.is_present:
-            self._display.updateGraph2D(graph,value)
-
-
-
-
-    
-
-
+            self._display.updateGraph2D(graph, value)

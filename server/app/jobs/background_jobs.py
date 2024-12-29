@@ -15,6 +15,7 @@ def update_firmware():
                 "wifi_config.py",
                 "hwconfig_supermini.py",
                 "hwconfig_xiao.py",
+                "ruff.toml",
             ) and (file_name.endswith((".py", ".pf"))):
                 relative_path = os.path.relpath(file_path, folder_path)
 
