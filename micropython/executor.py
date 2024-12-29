@@ -19,8 +19,6 @@ DEVICE_CYCLE_INTERVAL_MS = (
 BUTTON_LONG_PRESS_MS = (
     100  # how long the button needs to be held to trigger a long press
 )
-LED_BLINK_INTERVAL_MS = 10000  # how often the LED blinks
-LED_BLINK_DURATION_MS = 10  # how long the LED blinks for
 
 last_press_time = {}
 current_raw_display = None
@@ -95,18 +93,6 @@ def display_raw(raw_data):
     last_raw_display = current_raw_display
 
 
-async def fetch_config():
-    global current_device_config
-    try:
-        response = requests.get(
-            f"{api_host}/devices/config/{device_id}",
-            headers={"Authorization": device_secret},
-        )
-        current_device_config = response.json()
-    except Exception as e:
-        print(f"Error fetching config: {e}")
-
-
 def button_pressed(event):
     global button_click
     if event.value() == 0:
@@ -178,6 +164,11 @@ async def load_new_activity(path):
     activities.append(activity(activityName, hardware, functions, secrets))
 
 
+async def set_current_device_config(new_config):
+    global current_device_config
+    current_device_config = new_config
+
+
 def register():
     response = requests.post(
         f"{api_host}/devices/register",
@@ -216,6 +207,7 @@ async def main():
         disable_button_holding,
         load_new_activity,
         unload_activity,
+        set_current_device_config,
     )
     secrets = Secrets(device_secret, api_host, device_id)
 
@@ -224,9 +216,10 @@ async def main():
     await load_new_activity("dashboard.py")
     await switch_activity("dashboard")
 
+    # prerender dashboard
+    await current_activity.render()
+
     button_held_time = 0
-    last_fetch_time = utime.ticks_ms()
-    last_blink_time = utime.ticks_ms()
     while True:
         # Check if button is being held, give button actions priority
         if not BUTTON.value() and not button_holding_disabled:
@@ -246,7 +239,6 @@ async def main():
                 await current_activity.button_long_click()
             elif button_click:
                 button_click = False
-                print(activities)
 
                 await current_activity.button_click()
 
@@ -255,28 +247,6 @@ async def main():
             button_held_time = 0
 
             # Now we can do anything unrelated to buttons
-            # Refresh config every fetchInterval
-            if current_activity.name == "dashboard":
-                if (
-                    utime.ticks_diff(utime.ticks_ms(), last_fetch_time)
-                    > current_device_config["configFetchInterval"]
-                ):
-                    last_fetch_time = utime.ticks_ms()
-                    asyncio.create_task(fetch_config())
-                if (
-                    current_device_config
-                    and len(current_device_config["notifications"]) > 0
-                ):
-                    if (
-                        utime.ticks_diff(utime.ticks_ms(), last_blink_time)
-                    ) > LED_BLINK_INTERVAL_MS:
-                        last_blink_time = utime.ticks_ms()
-                        LED.on()
-                    if (LED.value() == 1) and (
-                        utime.ticks_diff(utime.ticks_ms(), last_blink_time)
-                        > LED_BLINK_DURATION_MS
-                    ):
-                        LED.off()
 
             # Allow the current activity to do its thing
             await current_activity.render()
