@@ -6,20 +6,34 @@ import requests
 import copy
 import machine
 
-from firmware import firmware_update
 from activity import Activity
 import sys
 import executor
+
+LED_BLINK_INTERVAL_MS = 5000  # how often the LED blinks
+LED_BLINK_DURATION_MS = 10  # how long the LED blinks for
 
 
 class dashboard(Activity):
     def __init__(self, name, hardware, functions, secrets):
         super().__init__(name, hardware, functions, secrets)
         # Set up instance specific variables
-        self.current_task = None
-        self.last_fetch_time = utime.ticks_ms()
+        self.current_tasks = [None, None]
+        self.last_dashboard_fetch_time = utime.ticks_ms()
+        self.last_config_fetch_time = utime.ticks_ms()
+        self.last_blink_time = utime.ticks_ms()
         self.last_render_time = utime.ticks_ms()
         self.current_dashboard_data = None
+
+    async def fetch_config(self):
+        try:
+            response = requests.get(
+                f"{self.secrets.api_host}/devices/config/{self.secrets.device_id}",
+                headers={"Authorization": self.secrets.device_secret},
+            )
+            self.functions.set_current_device_config(response.json())
+        except Exception as e:
+            print(f"Error fetching config: {e}")
 
     async def fetch_dashboard(self):
         try:
@@ -35,16 +49,44 @@ class dashboard(Activity):
     async def render(self):
         curr_time = utime.ticks_ms()
 
-        # Check if it's time to fetch the dashboard
+        # Check if it's time to refresh dashboard data
         if (
-            utime.ticks_diff(curr_time, self.last_fetch_time)
+            utime.ticks_diff(curr_time, self.last_dashboard_fetch_time)
             > self.functions.get_current_device_config()["dashboard"][
                 "dashboardFetchInterval"
             ]
         ):
-            self.last_fetch_time = curr_time
-            # await fetch_dashboard()
-            self.current_task = asyncio.create_task(self.fetch_dashboard())
+            self.last_dashboard_fetch_time = curr_time
+
+            # don't allow multiple fetches to happen at once
+            if self.current_tasks[0] and self.current_tasks[0].done():
+                self.current_tasks[0] = asyncio.create_task(self.fetch_dashboard())
+
+        # Check if it's time to refresh device config
+        if (
+            utime.ticks_diff(curr_time, self.last_config_fetch_time)
+            > self.functions.get_current_device_config()["configFetchInterval"]
+        ):
+            self.last_config_fetch_time = utime.ticks_ms()
+            # don't allow multiple fetches to happen at once
+            if self.current_tasks[1] and self.current_tasks[1].done():
+                self.current_tasks[1] = asyncio.create_task(self.fetch_config())
+
+        # Check if we need to blink the LED for notifications
+        if (
+            self.functions.get_current_device_config()
+            and len(self.functions.get_current_device_config()["notifications"]) > 0
+        ):
+            if (
+                utime.ticks_diff(utime.ticks_ms(), self.last_blink_time)
+            ) > LED_BLINK_INTERVAL_MS:
+                self.last_blink_time = utime.ticks_ms()
+                self.hardware.led.on()
+            if (self.hardware.led.value() == 1) and (
+                utime.ticks_diff(utime.ticks_ms(), self.last_blink_time)
+                > LED_BLINK_DURATION_MS
+            ):
+                self.hardware.led.off()
 
         # Render every 0.3 seconds
         if utime.ticks_diff(curr_time, self.last_render_time) > 300:
@@ -76,24 +118,26 @@ class dashboard(Activity):
             machine.soft_reset()
 
     async def button_long_click(self):
-        await self.current_task
+        for task in self.current_tasks:
+            if task:
+                task.cancel()
+
         await self.functions.load_new_activity("menu")
         await self.functions.switch_activity("menu")
 
     async def on_mount(self):
-        self.last_fetch_time = utime.ticks_ms()
+        self.last_dashboard_fetch_time = utime.ticks_ms()
         self.last_render_time = utime.ticks_ms()
         self.current_dashboard_data = None
         self.hardware.display.clear()
-        if self.current_task:
-            await self.current_task
-            self.current_task.cancel()
-            self.current_task = None
-        self.last_fetch_time = utime.ticks_ms()
-        self.current_task = asyncio.create_task(self.fetch_dashboard())
+        for task in self.current_tasks:
+            if task:
+                task.cancel()
+        self.last_dashboard_fetch_time = utime.ticks_ms()
+        self.current_tasks[0] = asyncio.create_task(self.fetch_dashboard())
+        self.current_tasks[1] = asyncio.create_task(self.fetch_config())
 
     async def on_unmount(self):
-        if self.current_task:
-            await self.current_task
-            self.current_task.cancel()
-            self.current_task = None
+        for task in self.current_tasks:
+            if task:
+                task.cancel()

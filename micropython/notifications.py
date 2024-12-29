@@ -114,8 +114,7 @@ class notifications(Activity):
                     self.hardware.display.select_font(None)
                     self.hardware.display.text("No", 0, 0, 1, 0, 128, 64, 1)
                     self.hardware.display.text("notifications!", 0, 8, 1, 0, 128, 64, 1)
-                    self.hardware.display.text("Returning", 0, 24, 1, 0, 128, 64, 1)
-                    self.hardware.display.text("to menu...", 0, 32, 1, 0, 128, 64, 1)
+                    self.hardware.display.text("Returning...", 0, 24, 1, 0, 128, 64, 1)
                     self.hardware.display.show()
                     await asyncio.sleep(5)
                     await self.functions.switch_activity("dashboard")
@@ -142,9 +141,7 @@ class notifications(Activity):
         await self.functions.switch_activity("dashboard")
 
     async def on_mount(self):
-        self.hardware.display.clear()
+        pass
 
     async def on_unmount(self):
-        # self.functions.unload_activity("notifications")
-        # await self.functions.switch_activity("dashboard")
-        pass
+        self.functions.unload_activity("notifications")
