@@ -125,8 +125,7 @@ async def switch_activity(activity_name):
         current_activity, \
         button_holding_disabled, \
         current_raw_display, \
-        last_raw_display, \
-        DISPLAY
+        last_raw_display
     new_activity = None
     for activity in activities:
         if activity.name == activity_name:
@@ -138,6 +137,7 @@ async def switch_activity(activity_name):
         current_raw_display = None
         last_raw_display = None
         DISPLAY.clear()
+        LED.off()
         button_holding_disabled = False
         if current_activity:
             await current_activity.on_unmount()
