@@ -12,7 +12,7 @@ import asyncio
 
 from secrets import device_secret, api_host, device_id, pairing_code
 from firmware import firmware_update
-from hwconfig import DISPLAY, BUTTON
+from hwconfig import DISPLAY, BUTTON, LED
 
 
 def connectToNetwork(ssid, ssid_password):
@@ -100,6 +100,7 @@ def main():
 
             machine.reset()
     DISPLAY.clear()
+    LED.on()
     DISPLAY.text("Desk Buddy is", 0, 0, 1, 0, 128, 64, 1)
     DISPLAY.text("Starting up...", 0, 16, 1, 0, 128, 64, 1)
     DISPLAY.text("o", 0, 40, 1, 0, 128, 64, 1)
@@ -107,6 +108,7 @@ def main():
     DISPLAY.text("[o_o]", 0, 56, 1, 0, 128, 64, 1)
     DISPLAY.show()
     time.sleep(3)
+    LED.off()
     while True:
         try:
             try:
