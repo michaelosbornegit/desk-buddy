@@ -85,10 +85,29 @@ def notifications_menu_item(device_config):
     }
 
 
+def settings_menu_item():
+    return {
+        "label": "Settings",
+        "children": [
+            {
+                "label": "Pairing Code",
+                "action": "activity",
+                "path": "pairing_code_activity.py",
+            },
+            {
+                "label": "Update",
+                "action": "activity",
+                "path": "reboot_activity.py",
+            },
+        ],
+    }
+
+
 def build_main_menu(device_config):
     menu = [
         notifications_menu_item(device_config),
         build_apps_menu(),
+        settings_menu_item(),
     ]
 
     return menu
