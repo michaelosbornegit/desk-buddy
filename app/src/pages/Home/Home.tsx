@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Mail, Message, Settings, Visibility } from '@mui/icons-material';
+import { Mail, ManageHistory, Message, Settings, Visibility } from '@mui/icons-material';
 import { Alert, Button, Container, Typography } from '@mui/material';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -27,7 +27,7 @@ const Home = (): JSX.Element => {
           Welcome <b>{currentUser?.displayName}</b>
         </Typography>
         <Typography textAlign={'right'}>
-          Desk Buddy <b>{currentUser?.pairingCode}</b>
+          Pairing Code <b>{currentUser?.pairingCode}</b>
         </Typography>
       </div>
       <Typography sx={{ marginBottom: '32px' }}>What would you like to do?</Typography>
@@ -72,6 +72,19 @@ const Home = (): JSX.Element => {
         disabled
       >
         customize buddy (coming soon)
+      </Button>
+      <Button
+        variant="contained"
+        size="large"
+        onClick={() => {
+          window.open('https://github.com/michaelosbornegit/desk-buddy/releases', '_blank');
+        }}
+        fullWidth
+        sx={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between' }}
+        color="secondary"
+        endIcon={<ManageHistory />}
+      >
+        view change log
       </Button>
       <Alert severity="info" sx={{ marginBottom: '32px' }}>
         Buddy messed up?
