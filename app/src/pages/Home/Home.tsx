@@ -77,7 +77,8 @@ const Home = (): JSX.Element => {
         Buddy messed up?
         <br />
         <br />
-        Plug it in while holding the button to factory reset it.
+        Plug it in while holding the button to factory reset it. Don&apos;t worry! You won&apos;t
+        lose messages or data.
       </Alert>
     </Container>
   );

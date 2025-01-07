@@ -69,8 +69,11 @@ const Login = (): JSX.Element => {
                 variant="outlined"
               />
               <Alert severity="warning" sx={{ marginBottom: '16px' }}>
-                Can&apos;t find your pairing code? It&apos;s in the Desk Buddy menu under Pair Code:{' '}
-                <b>hold button -{'>'} Pair Code</b>
+                Can&apos;t find your pairing code? It&apos;s in the Desk Buddy menu:
+                <br />
+                <b>
+                  hold button -{'>'} Settings -{'>'} Pairing Code
+                </b>
               </Alert>
               <Button type="submit" variant="contained" fullWidth>
                 Login
