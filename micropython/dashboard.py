@@ -91,10 +91,10 @@ class dashboard(Activity):
         # Render every 0.3 seconds
         if utime.ticks_diff(curr_time, self.last_render_time) > 300:
             if self.current_dashboard_data:
-                filled_in_dashbaord = copy.deepcopy(self.current_dashboard_data)
+                filled_in_dashboard = copy.deepcopy(self.current_dashboard_data)
                 # Replace content with what device can provide
                 current_time = get_los_angeles_time()
-                for row in filled_in_dashbaord:
+                for row in filled_in_dashboard:
                     for widget in row["children"]:
                         if "__CURRENT_DEVICE_TIME__" in widget["content"]:
                             hour = current_time[3]
@@ -107,7 +107,7 @@ class dashboard(Activity):
                                     hour, current_time[4], current_time[5], am_pm
                                 ),
                             )
-                self.functions.set_current_raw_display(filled_in_dashbaord)
+                self.functions.set_current_raw_display(filled_in_dashboard)
                 self.last_render_time = utime.ticks_ms()
 
     async def button_click(self):
@@ -126,14 +126,15 @@ class dashboard(Activity):
         await self.functions.switch_activity("menu")
 
     async def on_mount(self):
-        self.last_dashboard_fetch_time = utime.ticks_ms()
-        self.last_render_time = utime.ticks_ms()
+        # Ensure we render the dashboard immediately
+        self.last_render_time = utime.ticks_ms() - 60000
         self.current_dashboard_data = None
         self.hardware.display.clear()
         for task in self.current_tasks:
             if task:
                 task.cancel()
         self.last_dashboard_fetch_time = utime.ticks_ms()
+        self.last_config_fetch_time = utime.ticks_ms()
         self.current_tasks[0] = asyncio.create_task(self.fetch_dashboard())
         self.current_tasks[1] = asyncio.create_task(self.fetch_config())
 
