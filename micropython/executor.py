@@ -2,6 +2,7 @@ import network
 import requests
 import utime
 import asyncio
+import gc
 from machine import Pin
 
 from utils import get_property_if_exists
@@ -141,6 +142,7 @@ async def switch_activity(activity_name):
         button_holding_disabled = False
         if current_activity:
             await current_activity.on_unmount()
+        gc.collect()
         await new_activity.on_mount()
         current_activity = new_activity
     else:
