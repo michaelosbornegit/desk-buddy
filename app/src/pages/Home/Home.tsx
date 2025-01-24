@@ -18,8 +18,6 @@ const Home = (): JSX.Element => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
-  console.log(currentUser);
-
   return (
     <Container maxWidth="sm">
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '32px' }}>
@@ -55,9 +53,8 @@ const Home = (): JSX.Element => {
         sx={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between' }}
         color="secondary"
         endIcon={<Visibility />}
-        disabled
       >
-        view read messages (coming soon)
+        view messages
       </Button>
       <Button
         variant="contained"

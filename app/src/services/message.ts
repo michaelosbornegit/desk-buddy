@@ -14,3 +14,7 @@ export const sendMessage = (message: Message) => {
     body: JSON.stringify(message),
   });
 };
+
+export const getMessages = () => {
+  return enrichedFetch(`${import.meta.env.VITE_API_HOST}/messages/get-for-user`);
+};

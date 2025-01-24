@@ -25,13 +25,15 @@ def get_unread_messages(display_name):
     return messages
 
 
-def get_read_messages(display_name, limit, offset):
-    messages = (
-        db.messages.find({"to": {"$elemMatch": {"to": display_name, "read": True}}})
-        .sort("createdAt", -1)
-        .limit(limit)
-        .skip(offset)
+def get_messages(display_name, limit, offset):
+    messages = list(
+        db.messages.find(
+            {"$or": [{"to": {"$elemMatch": {"to": display_name, "read": True}}}, {"from": display_name}]}
+        ).sort("createdAt", -1)
+        # .limit(limit)
+        # .skip(offset)
     )
+    messages = json.loads(json.dumps(messages, default=str))
     return messages
 
 

@@ -15,13 +15,14 @@ def send_message():
     return services.send_message(message_from, message_to, message)
 
 
-@bp.route("get-read", methods=["GET"])
+@bp.route("get-for-user", methods=["GET"])
 @app_auth()
-def get_read_messages():
+def get_messages_for_user():
     display_name = session.get("displayName")
+    # pagination is not implemented
     limit = int(request.args.get("limit", 5))
     offset = int(request.args.get("offset", 0))
-    return services.get_read_messages(display_name, limit, offset)
+    return services.get_messages(display_name, limit, offset)
 
 
 @bp.route("get-recipients", methods=["GET"])
