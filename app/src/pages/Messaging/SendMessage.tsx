@@ -174,6 +174,7 @@ const SendMessage = (): JSX.Element => {
                           fontFamily: 'monospace',
                           fontSize: '20px',
                           width: '250px',
+                          lineHeight: 1,
                         },
                       },
                     }}
