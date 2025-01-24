@@ -201,19 +201,30 @@ def register(pairing_code, display_name, force_associate):
     }
 
 
-def build_notifications(device_config):
+def build_notifications(device):
     notifications = []
 
-    # check messages
-    messages = message_services.get_unread_messages(device_config["displayName"])
+    # if the device needs to reboot, send only the reboot message
+    device_needs_reboot = get_property_if_exists(device, "needsReboot")
 
-    for message in messages:
+    if device_needs_reboot:
         notifications.append(
             {
-                "type": "message",
-                "content": message,
+                "type": "reboot",
+                "content": "Device needs to reboot",
             }
         )
+    else:
+        # Add user messages
+        messages = message_services.get_unread_messages(device["deviceConfig"]["displayName"])
+
+        for message in messages:
+            notifications.append(
+                {
+                    "type": "message",
+                    "content": message,
+                }
+            )
 
     return notifications
 
@@ -224,9 +235,21 @@ def get_config(device_id):
     # put displayName on deviceConfig for display purposes on device, but otherwise keep it separate
     device_config["displayName"] = device["displayName"]
     device_config["firmware"] = get_firmware()
-    device_config["notifications"] = build_notifications(device_config)
+    device_config["notifications"] = build_notifications(device)
     device_config["menu"] = build_main_menu(device_config)
     return device_config
+
+
+def handle_device_boot(device_id):
+    # clear the need to reboot
+    db.devices.update_one(
+        {"deviceId": device_id},
+        {
+            "$set": {
+                "needsReboot": False,
+            },
+        },
+    )
 
 
 def get_firmware_contents(relative_path):

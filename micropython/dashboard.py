@@ -78,6 +78,12 @@ class dashboard(Activity):
             and len(self.functions.get_current_device_config()["notifications"]) > 0
         ):
             if (
+                self.functions.get_current_device_config()["notifications"][0]["type"]
+                == "reboot"
+            ):
+                machine.soft_reset()
+
+            if (
                 utime.ticks_diff(utime.ticks_ms(), self.last_blink_time)
             ) > LED_BLINK_INTERVAL_MS:
                 self.last_blink_time = utime.ticks_ms()

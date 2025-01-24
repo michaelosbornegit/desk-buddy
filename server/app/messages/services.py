@@ -20,7 +20,6 @@ def send_message(message_from, message_to, message):
 
 
 def get_unread_messages(display_name):
-    # Get latest 5 unread messages
     messages = list(db.messages.find({"to": {"$elemMatch": {"to": display_name, "read": False}}}).sort("createdAt", 1))
     messages = json.loads(json.dumps(messages, default=str))
     return messages
