@@ -175,7 +175,7 @@ def register():
     response = requests.post(
         f"{api_host}/devices/register",
         headers={"Authorization": device_secret},
-        json={"deviceId": device_id, "username": "test", "password": "test"},
+        json={"deviceId": device_id},
     )
 
     if response.status_code == 200:

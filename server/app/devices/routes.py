@@ -33,6 +33,8 @@ def device_register():
     device_config = services.get_config(request_data["deviceId"])
     if device_config["displayName"] is None:
         return abort(400, "Device not registered")
+
+    services.handle_device_boot(request_data["deviceId"])
     return device_config
 
 
