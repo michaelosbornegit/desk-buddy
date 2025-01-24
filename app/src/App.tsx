@@ -10,6 +10,7 @@ import Login from './pages/Login/Login';
 import Register from './pages/Login/Register';
 import SendMessage from './pages/Messaging/SendMessage';
 import theme from './theme';
+import MessageHistory from './pages/Messaging/MessageHistory';
 
 export default function App() {
   return (
@@ -36,15 +37,15 @@ export default function App() {
                     </RequireAuth>
                   }
                 />
-                {/* <Route
+                <Route
                   path="/message-history"
                   element={
                     <RequireAuth>
-                      <Home />
+                      <MessageHistory />
                     </RequireAuth>
                   }
                 />
-                <Route
+                {/* <Route
                   path="/configure-buddy"
                   element={
                     <RequireAuth>

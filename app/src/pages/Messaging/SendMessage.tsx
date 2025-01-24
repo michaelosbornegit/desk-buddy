@@ -1,29 +1,20 @@
 import styled from '@emotion/styled';
+import { Send } from '@mui/icons-material';
 import {
-  Alert,
   Box,
   Button,
-  Chip,
   Container,
-  MenuItem,
-  OutlinedInput,
+  Switch,
   TextField as MuiTextField,
   Typography,
-  Checkbox,
-  Switch,
 } from '@mui/material';
-import { FormApi, SubmissionErrors } from 'final-form';
-import { Checkboxes, Select, TextField } from 'mui-rff';
+import { Select } from 'mui-rff';
+import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import { Field, Form } from 'react-final-form';
-import { useNavigate } from 'react-router-dom';
 
-import { useAuth } from '../../components/AuthProvider';
-import { Message } from '../../types/messages';
-import { UserLogin } from '../../types/users';
-import { Send } from '@mui/icons-material';
 import { messageFetchRecipients, sendMessage } from '../../services/message';
-import { useSnackbar } from 'notistack';
+import { CreateMessage } from '../../types/messages';
 
 const PageContainer = styled(Container)({
   display: 'flex',
@@ -112,7 +103,7 @@ const SendMessage = (): JSX.Element => {
     }
   }, [recipients.length]);
 
-  const onSubmit = async (values: Message) => {
+  const onSubmit = async (values: CreateMessage) => {
     try {
       await sendMessage(values);
       enqueueSnackbar('Message sent', { variant: 'success' });
