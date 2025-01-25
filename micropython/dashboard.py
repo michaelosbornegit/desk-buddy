@@ -133,20 +133,24 @@ class dashboard(Activity):
                 self.functions.set_current_raw_display(filled_in_dashboard)
                 self.last_render_time = utime.ticks_ms()
 
+    async def load_menu(self):
+        for task in self.current_tasks:
+            if task:
+                task.cancel()
+        await self.functions.load_new_activity("menu")
+        await self.functions.switch_activity("menu")
+
     async def button_click(self):
+        await self.load_menu()
+
+    async def button_long_click(self):
         if get_property_if_exists(
             self.functions.get_current_device_config(), "devMode"
         ):
             print("Dev mode enabled, rebooting!")
             machine.soft_reset()
-
-    async def button_long_click(self):
-        for task in self.current_tasks:
-            if task:
-                task.cancel()
-
-        await self.functions.load_new_activity("menu")
-        await self.functions.switch_activity("menu")
+        else:
+            await self.load_menu()
 
     async def on_mount(self):
         # Ensure we render the dashboard immediately
