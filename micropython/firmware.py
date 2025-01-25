@@ -81,7 +81,7 @@ def firmware_update(device_config):
     for firmware in device_config["firmware"]:
         update_available = _check_for_update(firmware)
         # don't allow writing important micropython firmware files
-        if firmware["relative_path"] in ["boot.py", "main.py", "secrets.py"]:
+        if firmware["relative_path"] in ["boot.py", "secrets.py"]:
             raise Exception(
                 f'Firmware updater tried something forbidden: overwriting {firmware["relative_path"]}'
             )

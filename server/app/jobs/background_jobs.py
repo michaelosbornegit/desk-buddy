@@ -10,7 +10,6 @@ def update_firmware():
             file_path = os.path.join(root, file_name)
 
             if file_name not in (
-                "main.py",
                 "main_.py",
                 "wifi_config.py",
                 "hwconfig_supermini.py",
