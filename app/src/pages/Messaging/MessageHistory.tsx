@@ -38,14 +38,14 @@ const MessageHistory = (): JSX.Element => {
           marginBottom: '10px',
           padding: '10px',
           alignSelf: isSentByCurrentUser ? 'flex-end' : 'flex-start',
-          minWidth: '75%',
+          width: '75%',
         }}
       >
         <Box display="flex" flexDirection="column">
           <Typography variant="h6">From: {isSentByCurrentUser ? 'You' : message.from}</Typography>
           <Box display="flex">
             <Typography variant="h6">To:</Typography>
-            <Box display={'flex'} flexDirection={'row'}>
+            <Box display={'flex'} flexWrap={'wrap'} alignItems={'center'}>
               {message.to.map((recipient: { to: string; read: boolean }) => {
                 if (recipient.to === currentUser?.displayName) {
                   recipient.to = 'You';
@@ -53,8 +53,9 @@ const MessageHistory = (): JSX.Element => {
                 return (
                   <Chip
                     key={recipient.to}
+                    size="small"
                     label={recipient.to}
-                    sx={{ marginLeft: '5px' }}
+                    sx={{ marginLeft: '5px', marginBottom: '5px' }}
                     icon={
                       recipient.read ? <Visibility sx={{ height: '15px', width: '15px' }} /> : <></>
                     }
@@ -90,7 +91,9 @@ const MessageHistory = (): JSX.Element => {
 
   return (
     <PageContainer maxWidth="sm">
-      <Typography variant="h4">Message History</Typography>
+      <Typography variant="h4" marginBottom={'30px'}>
+        Message History
+      </Typography>
       <Box display="flex" flexDirection="column" width="100%">
         {messages.map((message: Message) => {
           return buildMessageCard(message);
