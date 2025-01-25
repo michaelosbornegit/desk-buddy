@@ -45,7 +45,7 @@ const MessageHistory = (): JSX.Element => {
           <Typography variant="h6">From: {isSentByCurrentUser ? 'You' : message.from}</Typography>
           <Box display="flex">
             <Typography variant="h6">To:</Typography>
-            <Box display={'flex'} flexWrap={'wrap'} alignItems={'center'}>
+            <Box display={'flex'} flexWrap={'wrap'} alignItems={'flex-end'}>
               {message.to.map((recipient: { to: string; read: boolean }) => {
                 if (recipient.to === currentUser?.displayName) {
                   recipient.to = 'You';
