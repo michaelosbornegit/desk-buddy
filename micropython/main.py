@@ -16,37 +16,47 @@ from hwconfig import DISPLAY, BUTTON, LED
 
 
 def connectToNetwork(ssid, ssid_password):
+    MAX_ATTEMPTS = 3
+    timeout = 10  # seconds
+
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        DISPLAY.clear()
+        DISPLAY.text(f"Attempt {attempt}", 0, 0, 1, 0, 128, 64, 1)
+        DISPLAY.text("Connecting to", 0, 8, 1, 0, 128, 64, 1)
+        DISPLAY.text(f"{ssid}", 0, 16, 1, 0, 128, 64, 1)
+        DISPLAY.text("((o))", 0, 40, 1, 0, 128, 64, 1)
+        DISPLAY.text("|", 0, 48, 1, 0, 128, 64, 1)
+        DISPLAY.text("[o_o]", 0, 56, 1, 0, 128, 64, 1)
+        DISPLAY.show()
+
+        sta_if = network.WLAN(network.STA_IF)
+        if not sta_if.isconnected():
+            print(f"Connecting to network... (Attempt {attempt})")
+            sta_if.active(True)
+            sta_if.connect(ssid, ssid_password)
+            start_time = time.time()
+            while not sta_if.isconnected():
+                if time.time() - start_time > timeout:
+                    print(f"Attempt {attempt} failed")
+                    break  # Retry the next attempt
+
+        if sta_if.isconnected():
+            ntptime.settime()
+            return
+
     DISPLAY.clear()
-    DISPLAY.text("Connecting to", 0, 0, 1, 0, 128, 64, 1)
-    DISPLAY.text(f"{ssid}", 0, 16, 1, 0, 128, 64, 1)
-    DISPLAY.text("((o))", 0, 40, 1, 0, 128, 64, 1)
-    DISPLAY.text("|", 0, 48, 1, 0, 128, 64, 1)
-    DISPLAY.text("[o_o]", 0, 56, 1, 0, 128, 64, 1)
+    DISPLAY.text("Failed to connect", 0, 0, 1, 0, 128, 64, 1)
+    DISPLAY.text("to network", 0, 8, 1, 0, 128, 64, 1)
+    DISPLAY.text("Check settings", 0, 16, 1, 0, 128, 64, 1)
+    DISPLAY.text("and try again", 0, 24, 1, 0, 128, 64, 1)
     DISPLAY.show()
-    sta_if = network.WLAN(network.STA_IF)
-    if not sta_if.isconnected():
-        print(f"Connecting to network...")
-        sta_if.active(True)
-        sta_if.connect(ssid, ssid_password)
-        timeout = 10  # seconds
-        start_time = time.time()
-        while not sta_if.isconnected():
-            if time.time() - start_time > timeout:
-                DISPLAY.clear()
-                DISPLAY.text("Failed to connect", 0, 0, 1, 0, 128, 64, 1)
-                DISPLAY.text("to network", 0, 8, 1, 0, 128, 64, 1)
-                DISPLAY.text("Check settings", 0, 16, 1, 0, 128, 64, 1)
-                DISPLAY.text("and try again", 0, 24, 1, 0, 128, 64, 1)
-                DISPLAY.show()
-                print("Failed to connect to network")
-                time.sleep(10)
-                try:
-                    os.remove("wifi_config.py")
-                except OSError:
-                    pass
-                machine.reset()
-    print("Network config:", sta_if.ipconfig("addr4"))
-    ntptime.settime()
+    print("Failed to connect after 3 attempts")
+    time.sleep(10)
+    try:
+        os.remove("wifi_config.py")
+    except OSError:
+        pass
+    machine.reset()
 
 
 def register():
