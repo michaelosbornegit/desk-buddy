@@ -49,6 +49,23 @@ class dashboard(Activity):
     async def render(self):
         curr_time = utime.ticks_ms()
 
+        if not self.current_tasks[0] and not self.current_tasks[1]:
+            self.functions.set_current_raw_display(
+                [
+                    {
+                        "height": 64,
+                        "children": [
+                            {
+                                "content": "\x31",
+                                "font": "icons-24-1",
+                                "horizAlign": 1,
+                                "vertAlign": 1,
+                            }
+                        ],
+                    },
+                ]
+            )
+
         # Check if it's time to refresh dashboard data
         if (
             utime.ticks_diff(curr_time, self.last_dashboard_fetch_time)
@@ -59,7 +76,7 @@ class dashboard(Activity):
             self.last_dashboard_fetch_time = curr_time
 
             # don't allow multiple fetches to happen at once
-            if self.current_tasks[0] and self.current_tasks[0].done():
+            if not self.current_tasks[0] or self.current_tasks[0].done():
                 self.current_tasks[0] = asyncio.create_task(self.fetch_dashboard())
 
         # Check if it's time to refresh device config
@@ -69,7 +86,7 @@ class dashboard(Activity):
         ):
             self.last_config_fetch_time = utime.ticks_ms()
             # don't allow multiple fetches to happen at once
-            if self.current_tasks[1] and self.current_tasks[1].done():
+            if not self.current_tasks[1] or self.current_tasks[1].done():
                 self.current_tasks[1] = asyncio.create_task(self.fetch_config())
 
         # Check if we need to blink the LED for notifications
@@ -135,14 +152,12 @@ class dashboard(Activity):
         # Ensure we render the dashboard immediately
         self.last_render_time = utime.ticks_ms() - 60000
         self.current_dashboard_data = None
-        self.hardware.display.clear()
         for task in self.current_tasks:
             if task:
                 task.cancel()
-        self.last_dashboard_fetch_time = utime.ticks_ms()
-        self.last_config_fetch_time = utime.ticks_ms()
-        self.current_tasks[0] = asyncio.create_task(self.fetch_dashboard())
-        self.current_tasks[1] = asyncio.create_task(self.fetch_config())
+        self.current_tasks = [None, None]
+        self.last_dashboard_fetch_time = utime.ticks_ms() - 60000
+        self.last_config_fetch_time = utime.ticks_ms() - 60000
 
     async def on_unmount(self):
         for task in self.current_tasks:
