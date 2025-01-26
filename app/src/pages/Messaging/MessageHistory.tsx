@@ -41,9 +41,9 @@ const MessageHistory = (): JSX.Element => {
         }}
       >
         <Box display="flex" flexDirection="column">
-          <Typography variant="h6">From: {isSentByCurrentUser ? 'You' : message.from}</Typography>
+          <Typography>From: {isSentByCurrentUser ? 'You' : message.from}</Typography>
           <Box display="flex">
-            <Typography variant="h6">To:</Typography>
+            <Typography>To:</Typography>
             <Box display={'flex'} flexWrap={'wrap'} alignItems={'flex-end'}>
               {message.to.map((recipient: { to: string; read: boolean }) => {
                 if (recipient.to === currentUser?.displayName) {
@@ -64,15 +64,24 @@ const MessageHistory = (): JSX.Element => {
             </Box>
           </Box>
         </Box>
-        <Typography
-          variant="body1"
-          whiteSpace={'pre-wrap'} // Allow multi-line wrapping
-          fontFamily={'monospace'}
-          lineHeight={'1'}
-          my={'10px'}
+        <div
+          style={{
+            whiteSpace: 'pre',
+            fontFamily: 'monospace',
+            fontSize: '18px',
+            width: 'calc(16ch + 2px)',
+            height: 'calc(1em * 7)',
+            backgroundColor: 'black',
+            color: 'white',
+            resize: 'none',
+            outline: 'none',
+            padding: '5px',
+            lineHeight: '1',
+            textAlign: message.centerLines ? 'center' : 'left',
+          }}
         >
           {message.message}
-        </Typography>
+        </div>
         <Typography variant="caption">
           {new Date(`${message.createdAt}Z`).toLocaleString(undefined, {
             year: 'numeric',

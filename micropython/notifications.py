@@ -5,6 +5,7 @@ import requests
 import copy
 
 from activity import Activity
+from utils import get_property_if_exists
 
 
 class notifications(Activity):
@@ -95,11 +96,24 @@ class notifications(Activity):
                     elif self.currently_viewing == "content":
                         self.hardware.display.clear()
                         self.hardware.display.select_font(None)
-                        split_content = self.current_notification["content"][
-                            "message"
-                        ].split("\n")
-                        for i, line in enumerate(split_content):
-                            self.hardware.display.text(line, 0, i * 8, 0, 0, 128, 64, 1)
+                        if not self.current_notification["content"]["message"]:
+                            self.hardware.display.text(
+                                "No content", 0, 0, 1, 0, 128, 64, 1
+                            )
+
+                        else:
+                            centerLines = 0
+                            if get_property_if_exists(
+                                self.current_notification["content"], "centerLines"
+                            ):
+                                centerLines = 1
+                            split_content = self.current_notification["content"][
+                                "message"
+                            ].split("\n")
+                            for i, line in enumerate(split_content):
+                                self.hardware.display.text(
+                                    line, 0, i * 8, centerLines, 0, 128, 64, 1
+                                )
                 self.rendered = True
             else:
                 # Figure out if we have a current notification
@@ -114,9 +128,8 @@ class notifications(Activity):
                     self.hardware.display.select_font(None)
                     self.hardware.display.text("No", 0, 0, 1, 0, 128, 64, 1)
                     self.hardware.display.text("notifications!", 0, 8, 1, 0, 128, 64, 1)
-                    self.hardware.display.text("Returning...", 0, 24, 1, 0, 128, 64, 1)
                     self.hardware.display.show()
-                    await asyncio.sleep(5)
+                    await asyncio.sleep(3)
                     await self.functions.switch_activity("dashboard")
 
     async def button_click(self):
