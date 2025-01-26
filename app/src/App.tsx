@@ -8,9 +8,9 @@ import NavBar from './components/NavBar';
 import Home from './pages/Home/Home';
 import Login from './pages/Login/Login';
 import Register from './pages/Login/Register';
+import MessageHistory from './pages/Messaging/MessageHistory';
 import SendMessage from './pages/Messaging/SendMessage';
 import theme from './theme';
-import MessageHistory from './pages/Messaging/MessageHistory';
 
 export default function App() {
   return (

@@ -10,7 +10,7 @@ const NavBar = (): JSX.Element => {
 
   return (
     <>
-      <AppBar position="static" sx={{ marginBottom: '16px', width: '100vw' }} color="secondary">
+      <AppBar position="static" sx={{ marginBottom: '16px' }} color="secondary">
         <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div onClick={() => navigate('/home')} style={{ cursor: 'pointer' }}>
             <Typography variant="h6">🤖 Desk Buddy</Typography>
