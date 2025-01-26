@@ -193,7 +193,7 @@ const SendMessage = (): JSX.Element => {
                         fontFamily: 'monospace',
                         width: 'calc(16ch + 2px)',
                         minHeight: 'calc(1em * 7)',
-                        height: 'auto',
+                        height: '178px',
                         resize: 'none',
                         padding: '5px',
                         lineHeight: '1',
