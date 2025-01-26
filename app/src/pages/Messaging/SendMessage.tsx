@@ -8,7 +8,7 @@ import {
   TextField as MuiTextField,
   Typography,
 } from '@mui/material';
-import { Select } from 'mui-rff';
+import { Select, Switches } from 'mui-rff';
 import { useSnackbar } from 'notistack';
 import React, { useEffect, useState } from 'react';
 import { Field, Form } from 'react-final-form';
@@ -87,7 +87,58 @@ type Recipient = {
 const SendMessage = (): JSX.Element => {
   const [smartTruncate, setSmartTruncate] = useState(true);
   const [recipients, setRecipients] = useState<Recipient[]>([]);
+  const [postProcessedMessage, setPostProcessedMessage] = useState('');
+  const [centerLines, setCenterLines] = useState(false);
+  const [showMessageTooLongWarning, setShowMessageTooLongWarning] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
+
+  const postProcessMessage = (message: string) => {
+    let processedMessage = '';
+    const maxLineLength = 16;
+
+    // Split message by user-entered newlines, preserving empty lines
+    const lines = message.split(/(\n)/);
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line === '\n') {
+        processedMessage += '\n';
+        continue;
+      }
+      let lineStart = 0;
+      while (lineStart < line.length) {
+        const end = lineStart + maxLineLength;
+
+        if (end >= line.length) {
+          processedMessage += line.slice(lineStart);
+          break;
+        }
+
+        // Look for the last space within the max line length
+        const lastSpace = line.lastIndexOf(' ', end);
+        if (lastSpace > lineStart) {
+          processedMessage += line.slice(lineStart, lastSpace) + '\n';
+          lineStart = lastSpace + 1; // Move to the character after the space
+        } else {
+          processedMessage += line.slice(lineStart, end) + '\n';
+          lineStart = end;
+        }
+      }
+    }
+
+    const splitMessage = processedMessage.split('\n');
+
+    if (splitMessage.length > 7) {
+      setShowMessageTooLongWarning(true);
+    } else {
+      setShowMessageTooLongWarning(false);
+    }
+
+    processedMessage = splitMessage.slice(0, 7).join('\n');
+
+    console.log(processedMessage);
+    setPostProcessedMessage(processedMessage);
+  };
 
   useEffect(() => {
     const fetchRecipients = async () => {
@@ -103,6 +154,9 @@ const SendMessage = (): JSX.Element => {
   }, [recipients.length]);
 
   const onSubmit = async (values: CreateMessage) => {
+    // we want the post processed version
+    values.message = postProcessedMessage;
+
     try {
       await sendMessage(values);
       enqueueSnackbar('Message sent', { variant: 'success' });
@@ -115,7 +169,7 @@ const SendMessage = (): JSX.Element => {
     <PageContainer maxWidth="sm">
       <Form
         onSubmit={onSubmit}
-        render={({ handleSubmit }) => {
+        render={({ handleSubmit, values }) => {
           return (
             <form
               onSubmit={handleSubmit}
@@ -127,55 +181,70 @@ const SendMessage = (): JSX.Element => {
                 gap: '16px',
               }}
             >
-              <Select
-                name="to"
-                label="Select Recipient(s)"
-                // formControlProps={{ margin: 'normal' }}
-                data={recipients}
-                required
-                multiple
-              />
-              <Box display="flex" alignItems="center">
-                <Switch
-                  checked={smartTruncate}
-                  onChange={(e) => setSmartTruncate(e.target.checked)}
-                />
-                <Typography sx={{ width: '100% ' }}>
-                  Split lines on spaces (better for typing sentences)
-                </Typography>
-              </Box>
-              {/* Hack for mui rff to allow us to have a controlled field to split lines */}
-              <Field name="message">
-                {({ input, meta }) => (
-                  <MuiTextField
-                    {...input}
-                    label="Message"
-                    name="message"
-                    required
-                    variant="outlined"
-                    multiline
-                    rows={7}
-                    sx={{
-                      marginBottom: '32px',
-                    }}
-                    slotProps={{
-                      input: {
-                        style: {
-                          fontFamily: 'monospace',
-                          fontSize: '20px',
-                          width: '250px',
-                          lineHeight: 1,
-                        },
-                      },
-                    }}
-                    onChange={(e) => {
-                      const modifiedValue = formatMessage(e.target.value, smartTruncate); // Custom logic to modify value
-                      input.onChange(modifiedValue); // Update form state
-                    }}
-                    helperText={meta.touched && meta.error}
-                  />
+              <Select name="to" label="Select Recipient(s)" data={recipients} required multiple />
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Typography style={{ marginBottom: '0', textAlign: 'center' }}>Message</Typography>
+                <Field name="message">
+                  {({ input }) => (
+                    <textarea
+                      {...input}
+                      style={{
+                        fontSize: '24px',
+                        fontFamily: 'monospace',
+                        width: 'calc(16ch + 2px)',
+                        minHeight: 'calc(1em * 7)',
+                        height: 'auto',
+                        resize: 'none',
+                        padding: '5px',
+                        lineHeight: '1',
+                        border: '1px solid #ccc',
+                        outline: 'none',
+                        overflow: 'hidden',
+                        textAlign: values.centerLines ? 'center' : 'left',
+                      }}
+                      onInput={(e) => {
+                        const castedTarget = e.target as HTMLTextAreaElement;
+                        castedTarget.style.height = 'auto';
+                        castedTarget.style.height = `${castedTarget.scrollHeight}px`;
+                        postProcessMessage(castedTarget.value);
+                      }}
+                      cols={16}
+                    />
+                  )}
+                </Field>
+                {showMessageTooLongWarning && (
+                  <Typography variant="caption" color="error">
+                    Desk Buddy&apos;s display only has 7 rows, see preview for what will be
+                    displayed
+                  </Typography>
                 )}
-              </Field>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ marginBottom: '16px' }}>
+                  <Switches name="centerLines" data={{ label: 'Center Lines', value: false }} />
+                </div>
+                <Typography style={{ marginBottom: '0', textAlign: 'center' }}>Preview</Typography>
+                <div
+                  style={{
+                    whiteSpace: 'pre',
+                    fontFamily: 'monospace',
+                    fontSize: '24px',
+                    width: 'calc(16ch + 2px)',
+                    height: 'calc(1em * 7)',
+                    backgroundColor: 'black',
+                    color: 'white',
+                    resize: 'none',
+                    outline: 'none',
+                    padding: '5px',
+                    lineHeight: '1',
+                    marginBottom: '32px',
+                    textAlign: values.centerLines ? 'center' : 'left',
+                  }}
+                >
+                  {postProcessedMessage}
+                </div>
+              </div>
               <Button
                 type="submit"
                 variant="contained"

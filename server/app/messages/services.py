@@ -6,12 +6,13 @@ from app.db import db
 from app import messages
 
 
-def send_message(message_from, message_to, message):
+def send_message(message_from, message_to, message, centerLines):
     augmented_recipients = [{"to": recipient, "read": False} for recipient in message_to]
     message_to_insert = {
         "from": message_from,
         "to": augmented_recipients,
         "message": message,
+        "centerLines": centerLines,
         "createdAt": datetime.datetime.now(tz=datetime.UTC),
     }
     inserted_message = db.messages.insert_one(message_to_insert)

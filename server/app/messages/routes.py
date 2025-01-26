@@ -12,7 +12,8 @@ def send_message():
     message_from = session.get("displayName")
     message_to = get_property_if_exists(request_data, "to")
     message = get_property_if_exists(request_data, "message")
-    return services.send_message(message_from, message_to, message)
+    centerLines = get_property_if_exists(request_data, "centerLines")
+    return services.send_message(message_from, message_to, message, centerLines)
 
 
 @bp.route("get-for-user", methods=["GET"])
