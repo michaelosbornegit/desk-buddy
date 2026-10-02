@@ -2,9 +2,9 @@ import utime
 import time
 import asyncio
 import requests
-import copy
 
 from activity import Activity
+from offline import OFFLINE_MODE
 from utils import get_property_if_exists
 
 
@@ -126,8 +126,14 @@ class notifications(Activity):
                 else:
                     self.hardware.display.clear()
                     self.hardware.display.select_font(None)
-                    self.hardware.display.text("No", 0, 0, 1, 0, 128, 64, 1)
-                    self.hardware.display.text("notifications!", 0, 8, 1, 0, 128, 64, 1)
+                    if OFFLINE_MODE:
+                        self.hardware.display.text("Offline mode", 0, 0, 1, 0, 128, 64, 1)
+                        self.hardware.display.text("Notifications", 0, 16, 1, 0, 128, 64, 1)
+                        self.hardware.display.text("need the server", 0, 24, 1, 0, 128, 64, 1)
+                        self.hardware.display.text("[-_-]", 0, 56, 1, 0, 128, 64, 1)
+                    else:
+                        self.hardware.display.text("No", 0, 0, 1, 0, 128, 64, 1)
+                        self.hardware.display.text("notifications!", 0, 8, 1, 0, 128, 64, 1)
                     self.hardware.display.show()
                     await asyncio.sleep(3)
                     await self.functions.switch_activity("dashboard")

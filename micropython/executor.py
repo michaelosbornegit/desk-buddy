@@ -12,6 +12,7 @@ from dashboard import dashboard
 from menu import menu
 from notifications import notifications
 from global_classes import Hardware, Functions, Secrets
+from offline import OFFLINE_MODE, build_offline_config
 
 # User configurable constants
 DEVICE_CYCLE_INTERVAL_MS = (
@@ -199,7 +200,7 @@ async def main():
         functions, \
         secrets
 
-    current_device_config = register()
+    current_device_config = build_offline_config() if OFFLINE_MODE else register()
 
     hardware = Hardware(DISPLAY, LED, BUTTON)
     functions = Functions(

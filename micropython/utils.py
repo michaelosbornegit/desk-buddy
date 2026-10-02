@@ -6,6 +6,15 @@ def get_property_if_exists(obj, property_name, default=None):
     return obj[property_name] if property_name in obj else default
 
 
+def deepcopy(obj):
+    # Enough of copy.deepcopy for JSON-like data, so we don't need to mip install copy
+    if isinstance(obj, dict):
+        return {key: deepcopy(value) for key, value in obj.items()}
+    if isinstance(obj, list):
+        return [deepcopy(item) for item in obj]
+    return obj
+
+
 def get_los_angeles_time():
     current_utc_time = time.localtime()
 

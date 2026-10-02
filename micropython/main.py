@@ -5,7 +5,6 @@ import requests
 import esp32
 import ntptime
 import sys
-import mip
 import machine
 import os
 import asyncio
@@ -13,6 +12,7 @@ import asyncio
 from secrets import device_secret, api_host, device_id, pairing_code
 from firmware import firmware_update
 from hwconfig import DISPLAY, BUTTON, LED
+from offline import OFFLINE_MODE
 
 
 def connectToNetwork(ssid, ssid_password):
@@ -121,6 +121,13 @@ def main():
     LED.off()
     while True:
         try:
+            if OFFLINE_MODE:
+                # No wifi or server, go straight to the dashboard, menu and games
+                import executor
+
+                asyncio.run(executor.main())
+                break
+
             try:
                 import wifi_config
 
@@ -132,9 +139,6 @@ def main():
 
                 captive_portal_setup.main()
                 break
-
-            # Install necessary modules
-            mip.install("copy")
 
             device_config = {}
             while True:

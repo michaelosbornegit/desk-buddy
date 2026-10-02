@@ -1,9 +1,9 @@
 import utime
 import asyncio
 import requests
-import copy
 
 from activity import Activity
+from utils import deepcopy
 
 
 class menu(Activity):
@@ -23,7 +23,7 @@ class menu(Activity):
         # if we have no menu states, push on the current menu from device config
         if len(self.menu_states) == 0:
             # tack on back button to the top level menu
-            top_level_menu = copy.deepcopy(
+            top_level_menu = deepcopy(
                 self.functions.get_current_device_config()["menu"]
             )
             top_level_menu.append({"label": "Go Back"})
@@ -107,7 +107,7 @@ class menu(Activity):
             ):
                 # we selected a submenu, push it on the stack
                 # tack on back button
-                menu = copy.deepcopy(
+                menu = deepcopy(
                     current_menu_state["menu"][
                         current_menu_state["selected_menu_item"]
                     ]["children"]

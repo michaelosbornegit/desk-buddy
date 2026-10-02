@@ -55,6 +55,7 @@ This repository uses a VS Code Dev Container and nix for easy environment setup,
 1. If your ESP32C3 doesn't have micropython on it, google how to install it.
 1. Open a new instance of Visual Studio code at this folder, don't reopen it in the dev container, because the MicroPico extension doesn't work in a dev container
 1. Make a copy of `micropython/secrets-example.py` and call it `micropython/secrets.py` and replace the values. Make sure you replace the DEVICE_SECRET with the same value you generated on the server with the same name. You can generate your own device_id and pairing_code, make sure to keep the pairing code short, something roughly 8 characters long.
+1. To run without wifi or the server, set `offline_mode = True` in `secrets.py`. Desk Buddy boots straight to a static dashboard, and the menu lists whatever is in `micropython/apps/`.
 1. Install the [MicroPico VS Code extension](https://marketplace.visualstudio.com/items?itemName=paulober.pico-w-go)
 1. `ctrl + shift + p` and search and execute `MicroPico: Connect`, then do `MicroPico: Upload project to Pico`, then open `main.py` and do `MicroPico: Run current file on Pico`
 1. Note that you must have the server running, and to make any edits to any files other than `main.py` in the micropython in the window open in the dev container, since DeskBuddy downloads the files from the server, it will overwrite any changes you make in the other window.

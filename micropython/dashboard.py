@@ -1,12 +1,12 @@
-from utils import get_los_angeles_time, get_property_if_exists
+from utils import deepcopy, get_los_angeles_time, get_property_if_exists
 import utime
 import time
 import asyncio
 import requests
-import copy
 import machine
 
 from activity import Activity
+from offline import OFFLINE_MODE, OFFLINE_DASHBOARD
 import sys
 import executor
 
@@ -47,6 +47,10 @@ class dashboard(Activity):
             print(f"Error fetching dashboard: {e}")
 
     async def render(self):
+        if OFFLINE_MODE:
+            # Nothing to fetch, the offline dashboard is drawn once on mount
+            return
+
         curr_time = utime.ticks_ms()
 
         if not self.current_tasks[0] and not self.current_tasks[1]:
@@ -114,7 +118,7 @@ class dashboard(Activity):
         # Render every 0.3 seconds
         if utime.ticks_diff(curr_time, self.last_render_time) > 300:
             if self.current_dashboard_data:
-                filled_in_dashboard = copy.deepcopy(self.current_dashboard_data)
+                filled_in_dashboard = deepcopy(self.current_dashboard_data)
                 # Replace content with what device can provide
                 current_time = get_los_angeles_time()
                 for row in filled_in_dashboard:
@@ -153,6 +157,10 @@ class dashboard(Activity):
             await self.load_menu()
 
     async def on_mount(self):
+        if OFFLINE_MODE:
+            self.functions.set_current_raw_display(OFFLINE_DASHBOARD)
+            return
+
         # Ensure we render the dashboard immediately
         self.last_render_time = utime.ticks_ms() - 60000
         self.current_dashboard_data = None

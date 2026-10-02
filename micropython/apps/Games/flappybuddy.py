@@ -2,7 +2,6 @@ import random
 import utime
 import asyncio
 import requests
-import copy
 
 from activity import Activity
 
